@@ -14,7 +14,316 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_messages: {
+        Row: {
+          contains_crisis_keywords: boolean | null
+          created_at: string
+          id: string
+          message: string
+          sender_type: string
+          sentiment_score: number | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          contains_crisis_keywords?: boolean | null
+          created_at?: string
+          id?: string
+          message: string
+          sender_type: string
+          sentiment_score?: number | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          contains_crisis_keywords?: boolean | null
+          created_at?: string
+          id?: string
+          message?: string
+          sender_type?: string
+          sentiment_score?: number | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_sessions: {
+        Row: {
+          created_at: string
+          crisis_indicators: Json | null
+          id: string
+          mood_rating: number | null
+          session_summary: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crisis_indicators?: Json | null
+          id?: string
+          mood_rating?: number | null
+          session_summary?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crisis_indicators?: Json | null
+          id?: string
+          mood_rating?: number | null
+          session_summary?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      counseling_bookings: {
+        Row: {
+          additional_notes: string | null
+          admin_notes: string | null
+          booking_type: string
+          contact_phone: string | null
+          counselor_name: string | null
+          created_at: string
+          id: string
+          preferred_date: string
+          preferred_time: string
+          status: string
+          topic_areas: string[] | null
+          updated_at: string
+          urgency_level: string
+          user_id: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          admin_notes?: string | null
+          booking_type: string
+          contact_phone?: string | null
+          counselor_name?: string | null
+          created_at?: string
+          id?: string
+          preferred_date: string
+          preferred_time: string
+          status?: string
+          topic_areas?: string[] | null
+          updated_at?: string
+          urgency_level?: string
+          user_id: string
+        }
+        Update: {
+          additional_notes?: string | null
+          admin_notes?: string | null
+          booking_type?: string
+          contact_phone?: string | null
+          counselor_name?: string | null
+          created_at?: string
+          id?: string
+          preferred_date?: string
+          preferred_time?: string
+          status?: string
+          topic_areas?: string[] | null
+          updated_at?: string
+          urgency_level?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mental_health_resources: {
+        Row: {
+          category: string
+          content_type: string
+          content_url: string | null
+          created_at: string
+          description: string | null
+          difficulty_level: string | null
+          duration_minutes: number | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          language: string
+          rating: number | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          category: string
+          content_type: string
+          content_url?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          language?: string
+          rating?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          category?: string
+          content_type?: string
+          content_url?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          language?: string
+          rating?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      peer_support_posts: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          is_anonymous: boolean | null
+          is_urgent: boolean | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          view_count: number | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          is_urgent?: boolean | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          view_count?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          is_urgent?: boolean | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      peer_support_responses: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_helpful: boolean | null
+          is_volunteer_response: boolean | null
+          post_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_helpful?: boolean | null
+          is_volunteer_response?: boolean | null
+          post_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_helpful?: boolean | null
+          is_volunteer_response?: boolean | null
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "peer_support_responses_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "peer_support_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          preferred_language: string | null
+          student_id: string | null
+          university: string | null
+          updated_at: string
+          user_id: string
+          year_of_study: number | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          preferred_language?: string | null
+          student_id?: string | null
+          university?: string | null
+          updated_at?: string
+          user_id: string
+          year_of_study?: number | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          preferred_language?: string | null
+          student_id?: string | null
+          university?: string | null
+          updated_at?: string
+          user_id?: string
+          year_of_study?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

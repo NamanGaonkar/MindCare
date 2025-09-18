@@ -12,8 +12,8 @@ const Navigation = () => {
     { name: "Chat Support", href: "/chat", icon: MessageCircle },
     { name: "Book Appointment", href: "/booking", icon: Calendar },
     { name: "Resources", href: "/resources", icon: BookOpen },
-    { name: "Peer Support", href: "/forum", icon: Users },
-    { name: "Admin", href: "/admin", icon: BarChart3 },
+    { name: "Community", href: "/peer-support", icon: Users },
+    { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   ];
 
   const isActive = (path: string) => location.pathname === path;
