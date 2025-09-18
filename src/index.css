@@ -7,36 +7,64 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+:root {
+    /* Mental Health Platform Color System */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 27%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 25% 27%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 25% 27%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Sky Blue Primary - Calming and trustworthy */
+    --primary: 197 71% 73%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 197 71% 85%;
+    --primary-dark: 197 71% 60%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Mint Green Secondary - Fresh and healing */
+    --secondary: 152 68% 85%;
+    --secondary-foreground: 155 25% 30%;
+    
+    /* Soft Lavender Accent - Gentle and supportive */
+    --accent: 260 20% 85%;
+    --accent-foreground: 260 25% 30%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted tones for subtle elements */
+    --muted: 210 20% 95%;
+    --muted-foreground: 215 15% 50%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Support colors */
+    --success: 152 68% 70%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 45 93% 75%;
+    --warning-foreground: 45 25% 25%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 210 20% 90%;
+    --input: 210 20% 95%;
+    --ring: 197 71% 73%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Beautiful gradients for mental health theme */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--accent)) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
+    --gradient-button: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-dark)) 100%);
+    
+    /* Gentle animations */
+    --transition-gentle: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Shadows for depth */
+    --shadow-soft: 0 4px 20px -4px hsl(var(--primary) / 0.15);
+    --shadow-card: 0 2px 12px -2px hsl(var(--primary) / 0.12);
+    --shadow-floating: 0 8px 30px -8px hsl(var(--primary) / 0.2);
 
     --sidebar-background: 0 0% 98%;
 
