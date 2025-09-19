@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { Brain } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -8,9 +8,9 @@ const Footer = () => {
           {/* Logo and Branding */}
           <div className="flex items-center space-x-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-primary to-secondary">
-              <Heart className="h-4 w-4 text-white" />
+              <Brain className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold text-foreground">MindfulMate</span>
+            <span className="text-lg font-bold text-foreground">MindCare</span>
           </div>
           
           {/* Credits */}
@@ -25,7 +25,7 @@ const Footer = () => {
           
           {/* Copyright */}
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} MindfulMate. All rights reserved.
+            © {new Date().getFullYear()} MindCare. All rights reserved.
           </p>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { MessageCircle, Calendar, Heart, ArrowRight } from "lucide-react";
+import { MessageCircle, Calendar, Brain, ArrowRight } from "lucide-react";
 
 const HeroSection = () => {
   return (
@@ -8,7 +8,7 @@ const HeroSection = () => {
       <div className="container px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8 inline-flex items-center space-x-2 rounded-full bg-secondary px-4 py-2">
-            <Heart className="h-4 w-4 text-primary animate-pulse" />
+            <Brain className="h-4 w-4 text-primary animate-pulse" />
             <span className="text-sm font-medium text-secondary-foreground">
               Your mental wellness matters
             </span>
@@ -46,7 +46,7 @@ const HeroSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             <div className="flex flex-col items-center p-6 rounded-lg bg-card shadow-sm">
               <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-3">
-                <Heart className="h-6 w-6 text-primary-foreground" />
+                <Brain className="h-6 w-6 text-primary-foreground" />
               </div>
               <h3 className="font-semibold text-foreground mb-1">Confidential</h3>
               <p className="text-sm text-muted-foreground text-center">

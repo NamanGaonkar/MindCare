@@ -18,7 +18,7 @@ import {
   Star,
   Clock,
   Users,
-  Heart
+  Brain
 } from "lucide-react";
 
 interface Resource {
@@ -33,6 +33,7 @@ interface Resource {
   view_count: number;
   is_featured: boolean;
   tags: string[];
+  url: string;
 }
 
 const Resources = () => {
@@ -85,13 +86,13 @@ const Resources = () => {
 
   const categories = [
     { id: "all", name: "All Resources", icon: BookOpen },
-    { id: "anxiety", name: "Anxiety", icon: Heart },
-    { id: "depression", name: "Depression", icon: Heart },
-    { id: "stress", name: "Stress Management", icon: Heart },
+    { id: "anxiety", name: "Anxiety", icon: Brain },
+    { id: "depression", name: "Depression", icon: Brain },
+    { id: "stress", name: "Stress Management", icon: Brain },
     { id: "academic", name: "Academic Support", icon: BookOpen },
     { id: "relationships", name: "Relationships", icon: Users },
-    { id: "self_care", name: "Self Care", icon: Heart },
-    { id: "crisis", name: "Crisis Resources", icon: Heart }
+    { id: "self_care", name: "Self Care", icon: Brain },
+    { id: "crisis", name: "Crisis Resources", icon: Brain }
   ];
 
   if (!user) {
@@ -250,7 +251,10 @@ const Resources = () => {
                         )}
                       </div>
 
-                      <Button className="w-full group-hover:shadow-soft transition-all">
+                      <Button 
+                        className="w-full group-hover:shadow-soft transition-all"
+                        onClick={() => window.open(resource.url, "_blank")}
+                      >
                         Access Resource
                       </Button>
                     </div>

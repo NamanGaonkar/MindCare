@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Heart, MessageCircle, Calendar, BookOpen, Users, LayoutDashboard } from "lucide-react";
+import { Menu, X, Brain, MessageCircle, Calendar, BookOpen, Users, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,10 +26,10 @@ const Navigation = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 transition-transform hover:scale-105">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-primary to-secondary shadow-soft">
-            <Heart className="h-5 w-5 text-white" />
+            <Brain className="h-5 w-5 text-white" />
           </div>
           <span className="text-xl font-bold text-foreground">
-            MindfulMate
+            MindCare
           </span>
         </Link>
 

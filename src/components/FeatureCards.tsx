@@ -10,8 +10,7 @@ import {
   Brain,
   Shield,
   Clock,
-  ArrowRight,
-  Heart
+  ArrowRight
 } from "lucide-react";
 
 const FeatureCards = () => {
@@ -141,7 +140,7 @@ const FeatureCards = () => {
                 </div>
                 <div className="w-px h-6 bg-border" />
                 <div className="flex items-center space-x-2 text-accent-foreground">
-                  <Heart className="h-5 w-5" />
+                  <Brain className="h-5 w-5" />
                   <span className="font-medium">Confidential</span>
                 </div>
               </div>
