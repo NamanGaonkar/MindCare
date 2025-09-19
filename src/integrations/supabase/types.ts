@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          appointment_date: string
+          booking_id: string
+          counselor_id: string | null
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          location: string | null
+          meeting_link: string | null
+          notes: string | null
+          reminder_sent_at: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_date: string
+          booking_id: string
+          counselor_id?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          location?: string | null
+          meeting_link?: string | null
+          notes?: string | null
+          reminder_sent_at?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string
+          booking_id?: string
+          counselor_id?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          location?: string | null
+          meeting_link?: string | null
+          notes?: string | null
+          reminder_sent_at?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "counseling_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           contains_crisis_keywords: boolean | null
@@ -92,13 +145,17 @@ export type Database = {
         Row: {
           additional_notes: string | null
           admin_notes: string | null
+          appointment_date: string | null
           booking_type: string
+          confirmed_at: string | null
+          confirmed_by: string | null
           contact_phone: string | null
           counselor_name: string | null
           created_at: string
           id: string
           preferred_date: string
           preferred_time: string
+          session_type: string | null
           status: string
           topic_areas: string[] | null
           updated_at: string
@@ -108,13 +165,17 @@ export type Database = {
         Insert: {
           additional_notes?: string | null
           admin_notes?: string | null
+          appointment_date?: string | null
           booking_type: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           contact_phone?: string | null
           counselor_name?: string | null
           created_at?: string
           id?: string
           preferred_date: string
           preferred_time: string
+          session_type?: string | null
           status?: string
           topic_areas?: string[] | null
           updated_at?: string
@@ -124,13 +185,17 @@ export type Database = {
         Update: {
           additional_notes?: string | null
           admin_notes?: string | null
+          appointment_date?: string | null
           booking_type?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           contact_phone?: string | null
           counselor_name?: string | null
           created_at?: string
           id?: string
           preferred_date?: string
           preferred_time?: string
+          session_type?: string | null
           status?: string
           topic_areas?: string[] | null
           updated_at?: string
