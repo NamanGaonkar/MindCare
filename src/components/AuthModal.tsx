@@ -105,7 +105,10 @@ const AuthModal = ({ children, onAuthSuccess }: AuthModalProps) => {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[480px]" aria-describedby="auth-modal-description">
+        <div className="sr-only" id="auth-modal-description">
+          Authentication modal for signing in or creating an account
+        </div>
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin" className="flex items-center gap-2">
