@@ -1,11 +1,11 @@
-# 🧠 MindCare
+#  MindCare
 
 MindCare is a digital mental health and psychological support system for students in higher education.  
 It helps students access stigma-free support, self-help resources, and professional guidance while giving institutions insights into student wellbeing.
 
 ---
 
-## 🚀 Features
+##  Features
 - AI-guided chatbot (Gemini API) for instant support  
 - Confidential booking with counselors/helplines  
 - Resource hub with videos & wellness guides  
@@ -14,7 +14,7 @@ It helps students access stigma-free support, self-help resources, and professio
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 - Frontend: React + TailwindCSS  
 - Backend & Auth: Supabase  
 - AI: Google Gemini API  
