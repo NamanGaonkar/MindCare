@@ -20,7 +20,8 @@ import {
   Eye,
   Plus,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from "lucide-react";
 
 interface Post {
@@ -33,6 +34,7 @@ interface Post {
   status: 'open' | 'answered' | 'closed';
   view_count: number;
   created_at: string;
+  user_id: string;
 }
 
 const PeerSupport = () => {
@@ -104,6 +106,24 @@ const PeerSupport = () => {
     } catch (error) {
       toast({
         title: "Failed to create post",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deletePost = async (postId: string) => {
+    try {
+      const { error } = await supabase.from('peer_support_posts').delete().eq('id', postId);
+      if (error) throw error;
+      toast({
+        title: "Post Deleted!",
+        description: "Your post has been successfully deleted.",
+      });
+      loadPosts();
+    } catch (error) {
+      toast({
+        title: "Failed to delete post",
         description: error.message,
         variant: "destructive",
       });
@@ -330,6 +350,11 @@ const PeerSupport = () => {
                           {post.title}
                         </CardTitle>
                       </div>
+                      {post.user_id === user?.id && (
+                        <Button variant="ghost" size="icon" onClick={() => deletePost(post.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>

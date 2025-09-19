@@ -1,0 +1,1 @@
+ALTER TABLE mental_health_resources ADD COLUMN url TEXT;

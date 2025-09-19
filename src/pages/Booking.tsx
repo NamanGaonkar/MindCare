@@ -7,20 +7,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Shield, Clock, Users, Phone, FileText } from "lucide-react";
+import { Calendar, Shield, Clock, Users, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import AuthModal from "@/components/AuthModal";
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
+import TimePicker from 'react-time-picker';
+import 'react-time-picker/dist/TimePicker.css';
 
 const Booking = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     bookingType: "",
-    preferredDate: "",
-    preferredTime: "",
+    preferredDate: new Date(),
+    preferredTime: "10:00",
     sessionType: "individual",
     urgencyLevel: "medium",
     contactPhone: "",
@@ -60,14 +64,14 @@ const Booking = () => {
 
       toast({
         title: "Booking submitted! 📅",
-        description: "Your appointment request has been received. We'll contact you within 24 hours.",
+        description: "Your appointment request has been received. We\'ll contact you within 24 hours.",
       });
 
       // Reset form
       setFormData({
         bookingType: "",
-        preferredDate: "",
-        preferredTime: "",
+        preferredDate: new Date(),
+        preferredTime: "10:00",
         sessionType: "individual",
         urgencyLevel: "medium",
         contactPhone: "",
@@ -87,10 +91,10 @@ const Booking = () => {
   };
 
   const handleTopicToggle = (topic: string) => {
-    setFormData(prev => ({
+    setFormData((prev: any) => ({
       ...prev,
       topicAreas: prev.topicAreas.includes(topic)
-        ? prev.topicAreas.filter(t => t !== topic)
+        ? prev.topicAreas.filter((t: string) => t !== topic)
         : [...prev.topicAreas, topic]
     }));
   };
@@ -248,7 +252,7 @@ const Booking = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="bookingType">Service Type *</Label>
-                    <Select value={formData.bookingType} onValueChange={(value) => setFormData(prev => ({ ...prev, bookingType: value }))}>
+                    <Select value={formData.bookingType} onValueChange={(value) => setFormData((prev: any) => ({ ...prev, bookingType: value }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select service type" />
                       </SelectTrigger>
@@ -263,7 +267,7 @@ const Booking = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="sessionType">Session Type</Label>
-                    <Select value={formData.sessionType} onValueChange={(value) => setFormData(prev => ({ ...prev, sessionType: value }))}>
+                    <Select value={formData.sessionType} onValueChange={(value) => setFormData((prev: any) => ({ ...prev, sessionType: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -277,28 +281,24 @@ const Booking = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="preferredDate">Preferred Date *</Label>
-                    <Input
-                      type="date"
-                      value={formData.preferredDate}
-                      onChange={(e) => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
-                      min={new Date().toISOString().split('T')[0]}
-                      required
+                    <DayPicker
+                      mode="single"
+                      selected={formData.preferredDate}
+                      onSelect={(date) => setFormData((prev: any) => ({ ...prev, preferredDate: date }))}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="preferredTime">Preferred Time *</Label>
-                    <Input
-                      type="time"
+                    <TimePicker
+                      onChange={(time) => setFormData((prev: any) => ({ ...prev, preferredTime: time }))}
                       value={formData.preferredTime}
-                      onChange={(e) => setFormData(prev => ({ ...prev, preferredTime: e.target.value }))}
-                      required
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="urgencyLevel">Urgency Level</Label>
-                    <Select value={formData.urgencyLevel} onValueChange={(value) => setFormData(prev => ({ ...prev, urgencyLevel: value }))}>
+                    <Select value={formData.urgencyLevel} onValueChange={(value) => setFormData((prev: any) => ({ ...prev, urgencyLevel: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -316,7 +316,7 @@ const Booking = () => {
                     <Input
                       type="tel"
                       value={formData.contactPhone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, contactPhone: e.target.value }))}
                       placeholder="(555) 123-4567"
                     />
                   </div>
@@ -344,7 +344,7 @@ const Booking = () => {
                   <Label htmlFor="additionalNotes">Additional Notes</Label>
                   <Textarea
                     value={formData.additionalNotes}
-                    onChange={(e) => setFormData(prev => ({ ...prev, additionalNotes: e.target.value }))}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, additionalNotes: e.target.value }))}
                     placeholder="Please share any additional information that might help us prepare for your session..."
                     rows={4}
                   />

@@ -19,7 +19,7 @@ const Footer = () => {
               Supporting student mental wellness through technology
             </p>
             <p className="text-xs text-muted-foreground">
-              Design by <span className="font-semibold text-primary">Team Nexus</span>
+              Designed By Naman Gaonkar & team
             </p>
           </div>
           
