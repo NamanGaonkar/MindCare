@@ -1,111 +1,118 @@
-import { useState } from 'react';
-import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Search, Film, Mic, BookOpen, Users } from 'lucide-react';
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import Navigation from "@/components/Navigation";
 import AuthModal from "@/components/AuthModal";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-const resourceData = {
-  featured: [
-    { title: 'Campus Counseling Center', description: 'Official university counseling services.', link: '#', icon: BookOpen },
-    { title: 'Student Health Services', description: 'Medical and wellness support.', link: '#', icon: Users },
-  ],
-  articles: [
-    { title: 'Understanding Anxiety', description: 'Learn about the symptoms and types of anxiety.', link: '#', icon: BookOpen },
-    { title: 'Tips for Better Sleep', description: 'Improve your sleep hygiene for better mental health.', link: '#', icon: BookOpen },
-  ],
-  videos: [
-    { title: 'Guided Meditation for Stress', description: 'A 10-minute guided meditation to calm your mind.', link: '#', icon: Film },
-    { title: 'The Science of Happiness', description: 'A TED talk on the science of well-being.', link: '#', icon: Film },
-  ],
-  podcasts: [
-    { title: 'The Happiness Lab', description: 'Dr. Laurie Santos on the science of happiness.', link: '#', icon: Mic },
-    { title: 'Feeling Good Podcast', description: 'Cognitive Behavioral Therapy (CBT) techniques.', link: '#', icon: Mic },
-  ],
-};
+import { Input } from "@/components/ui/input";
+import { BookOpen, Brain, Users, Search } from "lucide-react";
 
 const Resources = () => {
   const { user } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredResources = (category) =>
-    resourceData[category].filter((item) =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const handleSearch = (topic: string) => {
+    const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(topic + ' mental health')}`;
+    window.open(youtubeSearchUrl, "_blank");
+  };
 
-    if (!user) {
-        return (
-          <>
-            <Navigation />
-            <div className="container text-center py-20">
-              <h1 className="text-2xl font-semibold mb-4">Please Sign In</h1>
-              <p className="text-muted-foreground mb-6">You need to be signed in to access the resources.</p>
-              <AuthModal><Button>Sign In</Button></AuthModal>
-            </div>
-            <Footer />
-          </>
-        );
-      }
+  const categories = [
+    { id: "anxiety", name: "Anxiety", icon: Brain },
+    { id: "depression", name: "Depression", icon: Brain },
+    { id: "stress", name: "Stress Management", icon: Brain },
+    { id: "academic", name: "Academic Support", icon: BookOpen },
+    { id: "relationships", name: "Relationships", icon: Users },
+    { id: "self_care", name: "Self Care", icon: Brain },
+    { id: "crisis", name: "Crisis Resources", icon: Brain }
+  ];
 
-  return (
-    <div className="bg-background text-foreground">
-      <Navigation />
-      <main className="container mx-auto py-12 px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight">Resource Library</h1>
-          <p className="mt-3 text-lg text-muted-foreground">Explore curated articles, videos, and tools to support your well-being.</p>
-        </div>
-
-        <div className="relative max-w-2xl mx-auto mb-12">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search resources..."
-            className="w-full pl-12 py-3 rounded-full bg-muted border-border/50"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        <div className="space-y-10">
-          <ResourceSection title="Featured Resources" resources={filteredResources('featured')} />
-          <ResourceSection title="Articles & Guides" resources={filteredResources('articles')} />
-          <ResourceSection title="Videos & Webinars" resources={filteredResources('videos')} />
-          <ResourceSection title="Podcasts & Audio" resources={filteredResources('podcasts')} />
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
-};
-
-const ResourceSection = ({ title, resources }) => {
-  if (resources.length === 0) return null;
-
-  return (
-    <section>
-      <h2 className="text-2xl font-semibold mb-6">{title}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {resources.map((item, index) => (
-          <a href={item.link} key={index} target="_blank" rel="noopener noreferrer" className="block">
-            <Card className="h-full hover:bg-muted/50 transition-colors border-border/50 shadow-sm">
-              <CardContent className="p-6 flex items-start gap-4">
-                <div className="bg-primary/10 text-primary p-3 rounded-lg">
-                  <item.icon className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">{item.title}</h3>
-                  <p className="text-muted-foreground text-sm mt-1">{item.description}</p>
-                </div>
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <main className="container px-4 py-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Mental Health Resources
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              Access our comprehensive library of mental wellness resources, guides, and educational content.
+            </p>
+            
+            <Card className="shadow-floating border-border/50 bg-gradient-card max-w-md mx-auto">
+              <CardHeader className="text-center">
+                <CardTitle className="text-xl">Sign In Required</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-6">
+                  Please sign in to access our mental health resource library.
+                </p>
+                <AuthModal>
+                  <Button size="lg" className="w-full">
+                    Sign In to Access Resources
+                  </Button>
+                </AuthModal>
               </CardContent>
             </Card>
-          </a>
-        ))}
+          </div>
+        </main>
       </div>
-    </section>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <main className="container px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-4">
+              Find Your Calm
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Explore a world of guided meditations, calming exercises, and expert advice on YouTube.
+            </p>
+          </div>
+
+          <div className="relative max-w-2xl mx-auto mb-12">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              placeholder="Search for topics like 'anxiety', 'stress', 'mindfulness'..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchTerm)}
+              className="w-full pl-12 pr-4 py-3 text-lg rounded-full shadow-lg focus:ring-2 focus:ring-primary/50 transition-all"
+            />
+            <Button 
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full"
+              onClick={() => handleSearch(searchTerm)}
+            >
+              Search
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {categories.map((category) => (
+              <Card 
+                key={category.id} 
+                className="group hover:shadow-xl hover:-translate-y-2 transition-all ease-in-out duration-300 cursor-pointer overflow-hidden rounded-lg border-2 border-primary/10"
+                onClick={() => handleSearch(category.name)}
+              >
+                <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+                  <div className="p-4 bg-primary/10 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
+                    <category.icon className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {category.name}
+                  </h3>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
   );
 };
 

@@ -49,10 +49,9 @@ const Chat = () => {
   // Effect to initialize session
   useEffect(() => {
     if (user && !sessionId) {
+      // A simple way to create a session ID
       const newSessionId = `session_${user.id}_${Date.now()}`;
       setSessionId(newSessionId);
-      // You could potentially save this session ID in the user's profile or local storage
-      // to persist sessions across page loads.
     }
   }, [user, sessionId]);
 
@@ -72,17 +71,31 @@ const Chat = () => {
     setIsLoading(true);
     
     try {
-      // Use Supabase Edge Function for AI chat
       const { data, error } = await supabase.functions.invoke('chat-with-gemini', {
-        body: { message: userMessageContent, sessionId },
+        body: { 
+          message: userMessageContent, 
+          sessionId, 
+          moodRating: 5 // Default mood rating, can be updated with a UI element
+        },
       });
 
-      if (error) throw new Error(error.message);
-      if (!data.aiResponse) throw new Error("No response from AI assistant.");
+      if (error) {
+        console.error('Function invoke error:', error);
+        throw new Error(`Function Error: ${error.message}`);
+      }
+
+      if (data.error) {
+        console.error('Function execution error:', data.details);
+        throw new Error(`AI Error: ${data.error} - ${data.details || ''}`);
+      }
+      
+      if (!data.response) {
+        throw new Error("No response from AI assistant.");
+      }
 
       const aiMessage: ChatMessage = {
           id: `ai_${Date.now()}`,
-          message: data.aiResponse,
+          message: data.response,
           sender_type: 'ai',
           created_at: new Date().toISOString(),
       };
@@ -97,10 +110,16 @@ const Chat = () => {
             duration: 10000,
         });
       }
+      
+      // If this was the first message, the session ID might have been created on the backend
+      if (data.sessionId && !sessionId) {
+        setSessionId(data.sessionId);
+      }
 
     } catch (error: any) {
       toast({ title: "Message Failed", description: error.message, variant: "destructive" });
-      setMessages(prev => prev.slice(0, -1)); // Remove the user's message if send failed
+      // Revert optimistic update on failure
+      setMessages(prev => prev.filter(m => m.id !== userMessage.id)); 
     } finally {
       setIsLoading(false);
     }
