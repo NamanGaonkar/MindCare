@@ -21,23 +21,14 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 transition-transform hover:scale-105">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shadow-soft">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-6 w-6 text-primary"
-            >
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-              <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+              <path d="M8.5 10.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm7 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zM12 15c-1.66 0-3 1.34-3 3h6c0-1.66-1.34-3-3-3z" />
             </svg>
           </div>
           <span className="text-xl font-bold text-foreground">
@@ -46,7 +37,7 @@ const Navigation = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8">
+        <div className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -55,7 +46,7 @@ const Navigation = () => {
                 "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary",
                 location.pathname === item.href
                   ? "text-primary"
-                  : "text-foreground/70"
+                  : "text-muted-foreground"
               )}
             >
               <item.icon className="h-4 w-4" />
@@ -63,12 +54,12 @@ const Navigation = () => {
             </Link>
           ))}
           
-          <div className="flex items-center space-x-4 ml-8">
+          <div className="flex items-center space-x-4 ml-6">
             <ThemeToggle />
             
             {user ? (
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-foreground/70">Hello, {user.email}</span>
+                <span className="text-sm text-muted-foreground">Hi, {user.email}</span>
                 <Button variant="outline" size="sm" onClick={signOut}>
                   Sign Out
                 </Button>
@@ -76,7 +67,7 @@ const Navigation = () => {
             ) : (
               <AuthModal>
                 <Button variant="default" size="sm">
-                  Sign In
+                  Get Started
                 </Button>
               </AuthModal>
             )}
@@ -88,7 +79,7 @@ const Navigation = () => {
           <ThemeToggle />
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle navigation"
           >
@@ -106,22 +97,22 @@ const Navigation = () => {
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  "flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors",
                   location.pathname === item.href
                     ? "bg-primary/10 text-primary"
-                    : "text-foreground/70 hover:text-foreground hover:bg-muted/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
                 onClick={() => setIsOpen(false)}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className="h-5 w-5" />
                 <span>{item.title}</span>
               </Link>
             ))}
             
-            <div className="border-t pt-4 mt-4">
+            <div className="border-t border-border/40 pt-4 mt-4">
               {user ? (
-                <div className="space-y-2">
-                  <p className="text-sm text-foreground/70 px-3">Hello, {user.email}</p>
+                <div className="space-y-2 px-2">
+                  <p className="text-sm text-muted-foreground">Signed in as {user.email}</p>
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -135,11 +126,13 @@ const Navigation = () => {
                   </Button>
                 </div>
               ) : (
-                <AuthModal>
-                  <Button variant="default" size="sm" className="w-full">
-                    Sign In
-                  </Button>
-                </AuthModal>
+                <div className="px-2">
+                  <AuthModal>
+                    <Button variant="default" size="sm" className="w-full">
+                      Get Started
+                    </Button>
+                  </AuthModal>
+                </div>
               )}
             </div>
           </div>

@@ -1,28 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Users, 
-  MessageSquare, 
-  Heart, 
-  Clock, 
-  Eye,
-  Plus,
-  CheckCircle,
-  AlertCircle,
-  Trash2
-} from "lucide-react";
+import { Users, MessageSquare, Heart, Clock, Eye, Plus, CheckCircle, AlertCircle, Trash2, Shield } from "lucide-react";
 
 interface Post {
   id: string;
@@ -50,29 +40,28 @@ const PeerSupport = () => {
     content: "",
     category: "general",
     is_anonymous: true,
-    is_urgent: false
   });
 
-  useEffect(() => {
-    loadPosts();
-  }, []);
-
-  const loadPosts = async () => {
+  const loadPosts = useCallback(async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('peer_support_posts')
         .select('*')
-        .order('is_urgent', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setPosts((data || []) as Post[]);
-    } catch (error) {
-      console.error('Error loading posts:', error);
+    } catch (error: any) {
+      toast({ title: "Error Loading Posts", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadPosts();
+  }, [loadPosts]);
 
   const createPost = async () => {
     if (!user || !newPost.title.trim() || !newPost.content.trim()) return;
@@ -84,31 +73,16 @@ const PeerSupport = () => {
         content: newPost.content.trim(),
         category: newPost.category,
         is_anonymous: newPost.is_anonymous,
-        is_urgent: newPost.is_urgent
       });
 
       if (error) throw error;
 
-      toast({
-        title: "Post Created! 📝",
-        description: "Your post has been shared with the community.",
-      });
-
-      setNewPost({
-        title: "",
-        content: "",
-        category: "general",
-        is_anonymous: true,
-        is_urgent: false
-      });
+      toast({ title: "Post Created! 📝", description: "Your post has been shared with the community." });
+      setNewPost({ title: "", content: "", category: "general", is_anonymous: true });
       setShowNewPostDialog(false);
-      loadPosts();
-    } catch (error) {
-      toast({
-        title: "Failed to create post",
-        description: error.message,
-        variant: "destructive",
-      });
+      loadPosts(); // Refresh posts after creation
+    } catch (error: any) {
+      toast({ title: "Failed to create post", description: error.message, variant: "destructive" });
     }
   };
 
@@ -117,78 +91,38 @@ const PeerSupport = () => {
       const { error } = await supabase.from('peer_support_posts').delete().eq('id', postId);
       if (error) throw error;
       
-      setPosts(posts.filter(post => post.id !== postId));
+      // Instead of just filtering, we re-fetch to get the true state from the DB
+      await loadPosts();
 
-      toast({
-        title: "Post Deleted!",
-        description: "Your post has been successfully deleted.",
-      });
-    } catch (error) {
-      toast({
-        title: "Failed to delete post",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Post Deleted!", description: "Your post has been successfully removed." });
+    } catch (error: any) {
+      toast({ title: "Failed to delete post", description: error.message, variant: "destructive" });
     }
   };
 
   const categories = [
-    { id: "all", name: "All Posts", color: "bg-primary" },
-    { id: "general", name: "General", color: "bg-secondary" },
-    { id: "academic_stress", name: "Academic Stress", color: "bg-warning" },
-    { id: "anxiety", name: "Anxiety", color: "bg-destructive" },
-    { id: "depression", name: "Depression", color: "bg-info" },
-    { id: "relationships", name: "Relationships", color: "bg-success" },
-    { id: "self_care", name: "Self Care", color: "bg-accent" }
+    { id: "all", name: "All Posts" },
+    { id: "general", name: "General" },
+    { id: "academic", name: "Academic Stress" },
+    { id: "anxiety", name: "Anxiety" },
+    { id: "depression", name: "Depression" },
+    { id: "relationships", name: "Relationships" },
   ];
 
   const filteredPosts = posts.filter(post => 
     selectedCategory === "all" || post.category === selectedCategory
   );
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'answered': return <CheckCircle className="h-4 w-4 text-success" />;
-      case 'closed': return <CheckCircle className="h-4 w-4 text-muted-foreground" />;
-      default: return <MessageSquare className="h-4 w-4 text-primary" />;
-    }
-  };
-
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <main className="container px-4 py-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Peer Support Community
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              Connect with fellow students, share experiences, and support each other in a safe, moderated environment.
-            </p>
-            
-            <Card className="shadow-floating border-border/50 bg-gradient-card max-w-md mx-auto">
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="w-16 h-16 bg-gradient-hero rounded-full flex items-center justify-center shadow-soft">
-                    <Users className="h-8 w-8 text-primary-foreground" />
-                  </div>
-                </div>
-                <CardTitle className="text-xl">Join Our Community</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-6">
-                  Sign in to share your experiences and get support from your peers.
-                </p>
-                <AuthModal>
-                  <Button size="lg" className="w-full">
-                    Sign In to Join Community
-                  </Button>
-                </AuthModal>
-              </CardContent>
-            </Card>
-          </div>
+        <main className="container px-4 py-8 text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Join the Conversation</h1>
+            <p className="text-lg text-muted-foreground mb-8">Sign in to connect with peers and share your experiences.</p>
+            <AuthModal><Button size="lg">Sign In to Community</Button></AuthModal>
         </main>
+        <Footer />
       </div>
     );
   }
@@ -196,210 +130,90 @@ const PeerSupport = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
       <main className="container px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Peer Support Forum
-              </h1>
-              <p className="text-muted-foreground">
-                A safe space to connect, share, and support each other.
-              </p>
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Peer Support Forum</h1>
+              <p className="text-muted-foreground">A safe and anonymous space to connect and share.</p>
             </div>
-            
             <Dialog open={showNewPostDialog} onOpenChange={setShowNewPostDialog}>
               <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  New Post
-                </Button>
+                <Button><Plus className="h-4 w-4 mr-2" />New Post</Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                  <DialogTitle>Share with the Community</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Title</Label>
-                    <Input
-                      id="title"
-                      placeholder="What's on your mind?"
-                      value={newPost.title}
-                      onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="content">Message</Label>
-                    <Textarea
-                      id="content"
-                      placeholder="Share your thoughts, experiences, or ask for support..."
-                      rows={5}
-                      value={newPost.content}
-                      onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
+              <DialogContent className="sm:max-w-2xl">
+                <DialogHeader><DialogTitle>Share with the Community</DialogTitle></DialogHeader>
+                <div className="space-y-4 py-4">
+                  <Input placeholder="Post Title" value={newPost.title} onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))} />
+                  <Textarea placeholder="Share your thoughts anonymously..." rows={6} value={newPost.content} onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Select value={newPost.category} onValueChange={(value) => setNewPost(prev => ({ ...prev, category: value }))}>
                       <Label>Category</Label>
-                      <select
-                        className="w-full p-2 border rounded-md"
-                        value={newPost.category}
-                        onChange={(e) => setNewPost(prev => ({ ...prev, category: e.target.value }))}
-                      >
-                        {categories.filter(c => c.id !== 'all').map(category => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
+                      <select className="w-full p-2 border rounded-md"><option value="general">General</option></select>
+                    </Select>
+                    <div className="flex items-center space-x-2 pt-6">
+                        <input type="checkbox" id="anonymousCheck" checked={newPost.is_anonymous} onChange={(e) => setNewPost(prev => ({...prev, is_anonymous: e.target.checked}))} />
+                        <Label htmlFor="anonymousCheck">Post Anonymously</Label>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={newPost.is_anonymous}
-                        onChange={(e) => setNewPost(prev => ({ ...prev, is_anonymous: e.target.checked }))}
-                      />
-                      <span className="text-sm">Post anonymously</span>
-                    </label>
-                    
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={newPost.is_urgent}
-                        onChange={(e) => setNewPost(prev => ({ ...prev, is_urgent: e.target.checked }))}
-                      />
-                      <span className="text-sm">Mark as urgent</span>
-                    </label>
+                  <div className="bg-muted/50 p-3 rounded-lg flex items-start gap-3 text-sm">
+                    <Shield size={24} className="text-primary flex-shrink-0" />
+                    <p className="text-muted-foreground">Your post will be anonymous by default. Your user information will not be displayed.</p>
                   </div>
-                  
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setShowNewPostDialog(false)}>
-                      Cancel
-                    </Button>
-                    <Button 
-                      onClick={createPost}
-                      disabled={!newPost.title.trim() || !newPost.content.trim()}
-                    >
-                      Share Post
-                    </Button>
+                    <Button variant="outline" onClick={() => setShowNewPostDialog(false)}>Cancel</Button>
+                    <Button onClick={createPost} disabled={!newPost.title.trim() || !newPost.content.trim()}>Share Post</Button>
                   </div>
                 </div>
               </DialogContent>
             </Dialog>
           </div>
 
-          {/* Categories */}
-          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-6">
-            <TabsList className="grid w-full grid-cols-3 md:grid-cols-7">
-              {categories.map((category) => (
-                <TabsTrigger key={category.id} value={category.id} className="text-xs">
-                  {category.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <div className="flex border-b mb-4">
+            {categories.map(cat => (
+              <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`py-2 px-4 text-sm font-medium ${selectedCategory === cat.id ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}>
+                {cat.name}
+              </button>
+            ))}
+          </div>
 
-          {/* Posts */}
           {loading ? (
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader>
-                    <div className="h-4 bg-muted rounded w-3/4"></div>
-                    <div className="h-3 bg-muted rounded w-1/2"></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="h-3 bg-muted rounded"></div>
-                      <div className="h-3 bg-muted rounded w-2/3"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <div className="text-center py-12"><p>Loading posts...</p></div>
           ) : (
             <div className="space-y-4">
-              {filteredPosts.map((post) => (
-                <Card key={post.id} className="hover:shadow-soft transition-all ease-bounce cursor-pointer">
+              {filteredPosts.length > 0 ? filteredPosts.map(post => (
+                <Card key={post.id} className="hover:bg-muted/50 transition-colors">
                   <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          {getStatusIcon(post.status)}
-                          <Badge variant="outline" className="text-xs">
-                            {categories.find(c => c.id === post.category)?.name || post.category}
-                          </Badge>
-                          {post.is_urgent && (
-                            <Badge variant="destructive" className="text-xs">
-                              <AlertCircle className="h-3 w-3 mr-1" />
-                              Urgent
-                            </Badge>
-                          )}
-                          {post.is_anonymous && (
-                            <Badge variant="secondary" className="text-xs">
-                              Anonymous
-                            </Badge>
-                          )}
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <Badge variant="secondary" className="mb-2">{post.category}</Badge>
+                            <CardTitle className="text-xl">{post.title}</CardTitle>
                         </div>
-                        <CardTitle className="text-lg hover:text-primary transition-colors">
-                          {post.title}
-                        </CardTitle>
-                      </div>
-                      {post.user_id === user?.id && (
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); deletePost(post.id); }}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                        {post.user_id === user?.id && (
+                            <Button variant="ghost" size="icon" onClick={() => deletePost(post.id)}><Trash2 className="h-4 w-4" /></Button>
+                        )}
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground mb-4 line-clamp-3">
-                      {post.content}
-                    </p>
-                    
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {new Date(post.created_at).toLocaleDateString()}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
-                          {post.view_count} views
-                        </div>
-                      </div>
-                      
-                      <Badge variant={post.status === 'answered' ? 'default' : 'secondary'}>
-                        {post.status}
-                      </Badge>
+                    <p className="text-muted-foreground mb-4 line-clamp-3">{post.content}</p>
+                    <div className="text-xs text-muted-foreground flex items-center justify-between">
+                        <span>{post.is_anonymous ? 'Posted Anonymously' : 'Posted by User'}</span>
+                        <span>{new Date(post.created_at).toLocaleString()}</span>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
-
-          {!loading && filteredPosts.length === 0 && (
-            <div className="text-center py-12">
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-medium text-foreground mb-2">No Posts Yet</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Be the first to share something with the community!
-              </p>
-              <Button onClick={() => setShowNewPostDialog(true)}>
-                Create First Post
-              </Button>
+              )) : (
+                <div className="text-center py-12">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="font-medium text-foreground mb-2">No Posts in this Category</h3>
+                  <p className="text-sm text-muted-foreground">Be the first to share something!</p>
+                </div>
+              )}
             </div>
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
