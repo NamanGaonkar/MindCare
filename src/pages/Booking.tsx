@@ -107,7 +107,7 @@ const Booking = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-foreground mb-4">Schedule Your Appointment</h1>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our platform provides a secure and confidential way to book appointments with licensed counselors. If you are in crisis, please contact the helpline at +91 98765 43210.</p>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our platform provides a secure and confidential way to book appointments with licensed counselors. For immediate help, contact our campus hotline at <span className="font-semibold text-primary">+91 98765 43210</span>.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-12">

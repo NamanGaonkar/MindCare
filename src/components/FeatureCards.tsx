@@ -10,32 +10,36 @@ const features = [
 ];
 
 const FeatureCards = () => {
-  const cardVariants = {
-    offscreen: { y: 50, opacity: 0 },
-    onscreen: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", bounce: 0.4, duration: 0.8 },
-    },
-  };
-
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
       {features.map((feature, index) => (
         <motion.div
           key={index}
-          initial="offscreen"
-          whileInView="onscreen"
+          initial={{ y: 50, opacity: 0, scale: 0.9 }}
+          whileInView={{ y: 0, opacity: 1, scale: 1 }}
           viewport={{ once: true, amount: 0.5 }}
-          variants={cardVariants}
+          transition={{ 
+            delay: index * 0.1,
+            type: "spring", 
+            bounce: 0.4, 
+            duration: 0.8
+          }}
+          whileHover={{ scale: 1.05, y: -5 }}
+          className="cursor-pointer"
         >
-          <Card className="h-full">
+          <Card className="h-full shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/80 group">
             <CardHeader className="flex items-center gap-4">
-              <feature.icon className="h-8 w-8 text-primary" />
-              <CardTitle>{feature.title}</CardTitle>
+              <motion.div
+                whileHover={{ rotate: 360, scale: 1.2 }}
+                transition={{ duration: 0.6 }}
+                className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors"
+              >
+                <feature.icon className="h-8 w-8 text-primary" />
+              </motion.div>
+              <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">{feature.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">{feature.description}</p>
+              <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
             </CardContent>
           </Card>
         </motion.div>

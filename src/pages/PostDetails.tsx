@@ -33,8 +33,8 @@ const PostDetails = () => {
       setPost(postData);
 
       const { data: commentsData, error: commentsError } = await supabase
-        .from('post_comments')
-        .select('*, user:profiles(username)') // Assuming you have a profiles table with username
+        .from('peer_support_comments')
+        .select('*')
         .eq('post_id', id)
         .order('created_at', { ascending: true });
 
@@ -55,7 +55,7 @@ const PostDetails = () => {
     if (!newComment.trim() || !user || !id) return;
 
     try {
-      const { error } = await supabase.from('post_comments').insert({
+      const { error } = await supabase.from('peer_support_comments').insert({
         post_id: id,
         user_id: user.id,
         content: newComment.trim(),
@@ -72,7 +72,7 @@ const PostDetails = () => {
 
   const handleDeleteComment = async (commentId) => {
     try {
-      const { error } = await supabase.from('post_comments').delete().eq('id', commentId);
+      const { error } = await supabase.from('peer_support_comments').delete().eq('id', commentId);
       if (error) throw error;
       loadPostAndComments(); // Refresh comments
       toast({ title: 'Comment deleted' });
@@ -117,10 +117,11 @@ const PostDetails = () => {
                         <Card key={comment.id} className='bg-muted/50'>
                             <CardContent className='p-4 flex justify-between items-start'>
                                 <div>
-                                    <p className='font-semibold text-sm'>
-                                        {comment.user ? comment.user.username : 'Anonymous'}
-                                    </p>
+                                    <p className='font-semibold text-sm'>Anonymous User</p>
                                     <p className='text-muted-foreground'>{comment.content}</p>
+                                    <p className='text-xs text-muted-foreground mt-1'>
+                                        {new Date(comment.created_at).toLocaleDateString()}
+                                    </p>
                                 </div>
                                 {comment.user_id === user?.id && (
                                     <Button variant='ghost' size='icon' onClick={() => handleDeleteComment(comment.id)}>

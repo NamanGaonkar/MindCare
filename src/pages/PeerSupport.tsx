@@ -102,9 +102,9 @@ const PeerSupport = () => {
             .select('id')
             .eq('post_id', postId)
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
-        if (fetchError && fetchError.code !== 'PGRST116') throw fetchError; // Ignore "not found"
+        if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
 
         if (existingReaction) {
             await supabase.from('peer_support_reactions').delete().eq('id', existingReaction.id);

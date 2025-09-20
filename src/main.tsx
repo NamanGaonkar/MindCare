@@ -4,7 +4,7 @@ import "./index.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 
 createRoot(document.getElementById("root")!).render(
-  <ThemeProvider defaultTheme="light" storageKey="mindfulmate-theme">
+  <ThemeProvider defaultTheme="system" storageKey="mindfulmate-theme">
     <App />
   </ThemeProvider>
 );
