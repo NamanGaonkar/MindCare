@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { MessageSquare, Heart, Plus, Trash2, Shield } from "lucide-react";
+import { MessageSquare, Heart, Plus, Trash2 } from "lucide-react";
 
 const PeerSupport = () => {
   const { user } = useAuth();
@@ -35,7 +35,7 @@ const PeerSupport = () => {
     try {
       let query = supabase
         .from('peer_support_posts')
-        .select('*, reactions:post_reactions(user_id)')
+        .select('*, reactions:peer_support_reactions(user_id)')
         .order('created_at', { ascending: false });
 
       if (selectedCategory !== 'all') {
@@ -82,8 +82,8 @@ const PeerSupport = () => {
 
   const deletePost = async (postId) => {
     try {
-      await supabase.from('post_comments').delete().eq('post_id', postId);
-      await supabase.from('post_reactions').delete().eq('post_id', postId);
+      await supabase.from('peer_support_comments').delete().eq('post_id', postId);
+      await supabase.from('peer_support_reactions').delete().eq('post_id', postId);
       const { error } = await supabase.from('peer_support_posts').delete().eq('id', postId);
       if (error) throw error;
       loadPosts();
@@ -98,7 +98,7 @@ const PeerSupport = () => {
 
     try {
         const { data: existingReaction, error: fetchError } = await supabase
-            .from('post_reactions')
+            .from('peer_support_reactions')
             .select('id')
             .eq('post_id', postId)
             .eq('user_id', user.id)
@@ -107,9 +107,9 @@ const PeerSupport = () => {
         if (fetchError && fetchError.code !== 'PGRST116') throw fetchError; // Ignore "not found"
 
         if (existingReaction) {
-            await supabase.from('post_reactions').delete().eq('id', existingReaction.id);
+            await supabase.from('peer_support_reactions').delete().eq('id', existingReaction.id);
         } else {
-            await supabase.from('post_reactions').insert({ post_id: postId, user_id: user.id, reaction_type: 'like' });
+            await supabase.from('peer_support_reactions').insert({ post_id: postId, user_id: user.id, reaction_type: 'like' });
         }
 
         loadPosts(); 

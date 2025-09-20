@@ -139,7 +139,7 @@ const Booking = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label>Service Type *</Label>
-                    <Select required value={formData.bookingType} onValueChange={(value) => setFormData(prev => ({ ...prev, bookingType: value }))}>
+                    <Select required value={formData.bookingType} onValuechange={(value) => setFormData(prev => ({ ...prev, bookingType: value }))}>
                       <SelectTrigger><SelectValue placeholder="Select a service" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="campus_counseling">Campus Counseling</SelectItem>

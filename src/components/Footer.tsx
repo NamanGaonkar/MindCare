@@ -1,18 +1,18 @@
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Twitter, Instagram, Facebook } from "lucide-react";
 
 const Footer = () => {
-  const navLinks = [
-    { title: "About Us", href: "/about" },
-    { title: "Services", href: "/services" },
-    { title: "Resources", href: "/resources" },
-    { title: "Contact", href: "/contact" },
-    { title: "Privacy Policy", href: "/privacy" },
+  const socialLinks = [
+    { icon: Twitter, href: "#" },
+    { icon: Instagram, href: "#" },
+    { icon: Facebook, href: "#" },
   ];
 
   return (
     <footer className="bg-muted/50 border-t border-border/40">
       <div className="container py-12 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Logo and Description */}
           <div className="col-span-1">
             <Link to="/" className="flex items-center space-x-2 mb-4">
@@ -29,18 +29,28 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Social Media */}
           <div className="col-span-1">
-            <h3 className="font-semibold text-foreground mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link to={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {link.title}
-                  </Link>
-                </li>
+            <h3 className="font-semibold text-foreground mb-4">Follow Us</h3>
+            <div className="flex items-center space-x-4">
+              {socialLinks.map((social, index) => (
+                <Link key={index} to={social.href} className="text-muted-foreground hover:text-primary transition-colors">
+                  <social.icon className="h-5 w-5" />
+                </Link>
               ))}
-            </ul>
+            </div>
+          </div>
+
+          {/* Newsletter */}
+          <div className="col-span-1">
+            <h3 className="font-semibold text-foreground mb-4">Newsletter</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Subscribe for wellness tips and updates.
+            </p>
+            <div className="flex w-full max-w-sm items-center space-x-2">
+              <input type="email" placeholder="Email" className="flex-1 p-2 border border-border rounded-md" />
+              <Button type="submit" size="sm">Subscribe</Button>
+            </div>
           </div>
         </div>
 
