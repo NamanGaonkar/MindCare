@@ -29,6 +29,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (event === "SIGNED_IN") {
           navigate("/dashboard");
+        } else if (event === 'USER_UPDATED') {
+            navigate("/");
         }
       }
     );

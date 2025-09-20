@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/Navigation";
 import AuthModal from "@/components/AuthModal";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   BookOpen, 
@@ -42,6 +43,8 @@ const Resources = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+  const [showVideoDialog, setShowVideoDialog] = useState(false);
 
   useEffect(() => {
     loadResources();
@@ -62,6 +65,34 @@ const Resources = () => {
       console.error('Error loading resources:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getYouTubeVideoId = (url: string) => {
+    try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname === 'www.youtube.com' || urlObj.hostname === 'youtube.com') {
+            return urlObj.searchParams.get('v');
+        } else if (urlObj.hostname === 'youtu.be') {
+            return urlObj.pathname.slice(1);
+        }
+    } catch (error) {
+        console.error("Invalid URL:", error);
+    }
+    return null;
+  };
+
+  const handleResourceClick = (resource: Resource) => {
+    if (resource.content_type === 'video' && (resource.url.includes('youtube.com') || resource.url.includes('youtu.be'))) {
+        const videoId = getYouTubeVideoId(resource.url);
+        if (videoId) {
+            setSelectedVideoId(videoId);
+            setShowVideoDialog(true);
+        } else {
+            window.open(resource.url, "_blank");
+        }
+    } else {
+        window.open(resource.url, "_blank");
     }
   };
 
@@ -194,7 +225,11 @@ const Resources = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResources.map((resource) => (
-                <Card key={resource.id} className="group hover:shadow-floating transition-all ease-bounce cursor-pointer">
+                <Card 
+                  key={resource.id} 
+                  className="group hover:shadow-floating transition-all ease-bounce cursor-pointer flex flex-col"
+                  onClick={() => handleResourceClick(resource)}
+                >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
@@ -213,52 +248,45 @@ const Resources = () => {
                     <CardTitle className="text-lg group-hover:text-primary transition-colors">
                       {resource.title}
                     </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
                     {resource.description && (
                       <p className="text-sm text-muted-foreground line-clamp-2">
                         {resource.description}
                       </p>
                     )}
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        {resource.duration_minutes && (
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {resource.duration_minutes}min
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3" />
-                          {resource.rating.toFixed(1)}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          {resource.view_count}
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-1">
-                        {resource.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {resource.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{resource.tags.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-
-                      <Button 
-                        className="w-full group-hover:shadow-soft transition-all"
-                        onClick={() => window.open(resource.url, "_blank")}
-                      >
-                        Access Resource
-                      </Button>
-                    </div>
                   </CardContent>
+                  <CardFooter className="flex-col items-start gap-2">
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      {resource.duration_minutes && (
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {resource.duration_minutes}min
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3 w-3" />
+                        {resource.rating.toFixed(1)}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {resource.view_count}
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-1">
+                      {resource.tags.slice(0, 3).map((tag) => (
+                        <Badge key={tag} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {resource.tags.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{resource.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardFooter>
                 </Card>
               ))}
             </div>
@@ -275,6 +303,25 @@ const Resources = () => {
           )}
         </div>
       </main>
+
+      <Dialog open={showVideoDialog} onOpenChange={setShowVideoDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Video Resource</DialogTitle>
+          </DialogHeader>
+          {selectedVideoId && (
+            <div className="aspect-video">
+              <iframe
+                src={`https://www.youtube.com/embed/${selectedVideoId}`}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -160,6 +160,54 @@ const Dashboard = () => {
     }));
   };
 
+  const exportCrisisReports = async () => {
+    const { data, error } = await supabase
+      .from('counseling_bookings')
+      .select('*')
+      .or('urgency_level.eq.crisis,urgency_level.eq.high');
+
+    if (error) {
+      console.error("Error fetching crisis reports:", error);
+      return;
+    }
+
+    const csvContent = "data:text/csv;charset=utf-8,"
+      + "booking_id,user_id,booking_type,preferred_date,preferred_time,session_type,urgency_level,contact_phone,additional_notes,status\n"
+      + data.map(row => 
+        [row.id, row.user_id, row.booking_type, row.preferred_date, row.preferred_time, row.session_type, row.urgency_level, row.contact_phone, `\"${row.additional_notes}\"`, row.status].join(",")
+      ).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "crisis_reports.csv");
+    document.body.appendChild(link);
+    link.click();
+  };
+
+  const downloadAnalyticsData = async () => {
+    const [profilesRes, sessionsRes, bookingsRes, resourcesRes] = await Promise.all([
+      supabase.from('profiles').select('*'),
+      supabase.from('chat_sessions').select('*'),
+      supabase.from('counseling_bookings').select('*'),
+      supabase.from('mental_health_resources').select('*')
+    ]);
+
+    const data = {
+      profiles: profilesRes.data,
+      chat_sessions: sessionsRes.data,
+      counseling_bookings: bookingsRes.data,
+      mental_health_resources: resourcesRes.data
+    }
+
+    const jsonContent = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+    const link = document.createElement("a");
+    link.setAttribute("href", jsonContent);
+    link.setAttribute("download", "analytics_data.json");
+    document.body.appendChild(link);
+    link.click();
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
@@ -201,11 +249,11 @@ const Dashboard = () => {
       <main className="container px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Analytics Dashboard
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+            Welcome, {user.email?.split('@')[0]}
             </h1>
             <p className="text-muted-foreground">
-              Monitor platform usage and student wellbeing trends (anonymized data).
+              Here is your analytics dashboard for MindCare.
             </p>
           </div>
 
@@ -309,7 +357,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-soft border-border/50">
+            <Card className.tsxassName="shadow-soft border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Heart className="h-5 w-5" />
@@ -367,10 +415,10 @@ const Dashboard = () => {
                 <div className="pt-4 border-t">
                   <h4 className="font-medium mb-2">Quick Actions</h4>
                   <div className="space-y-2">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button variant="outline" size="sm" className="w-full justify-start" onClick={exportCrisisReports}>
                       Export Crisis Reports
                     </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button variant="outline" size="sm" className="w-full justify-start" onClick={downloadAnalyticsData}>
                       Download Analytics Data
                     </Button>
                   </div>

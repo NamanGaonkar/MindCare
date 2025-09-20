@@ -116,11 +116,13 @@ const PeerSupport = () => {
     try {
       const { error } = await supabase.from('peer_support_posts').delete().eq('id', postId);
       if (error) throw error;
+      
+      setPosts(posts.filter(post => post.id !== postId));
+
       toast({
         title: "Post Deleted!",
         description: "Your post has been successfully deleted.",
       });
-      loadPosts();
     } catch (error) {
       toast({
         title: "Failed to delete post",
@@ -351,7 +353,7 @@ const PeerSupport = () => {
                         </CardTitle>
                       </div>
                       {post.user_id === user?.id && (
-                        <Button variant="ghost" size="icon" onClick={() => deletePost(post.id)}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); deletePost(post.id); }}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}

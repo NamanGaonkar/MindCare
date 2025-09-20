@@ -17,18 +17,29 @@ import 'react-day-picker/dist/style.css';
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 
+interface BookingFormData {
+  bookingType: string;
+  preferredDate: Date | undefined;
+  preferredTime: string | null;
+  sessionType: 'individual' | 'group' | 'crisis';
+  urgencyLevel: 'low' | 'medium' | 'high' | 'crisis';
+  contactPhone: string;
+  topicAreas: string[];
+  additionalNotes: string;
+}
+
 const Booking = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<BookingFormData>({
     bookingType: "",
     preferredDate: new Date(),
     preferredTime: "10:00",
     sessionType: "individual",
     urgencyLevel: "medium",
     contactPhone: "",
-    topicAreas: [] as string[],
+    topicAreas: [],
     additionalNotes: ""
   });
 
@@ -43,6 +54,15 @@ const Booking = () => {
       return;
     }
 
+    if (!formData.preferredDate) {
+      toast({
+        title: "Please select a date",
+        description: "You must choose a preferred date for your appointment.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
@@ -50,10 +70,10 @@ const Booking = () => {
         .insert({
           user_id: user.id,
           booking_type: formData.bookingType,
-          preferred_date: formData.preferredDate,
+          preferred_date: formData.preferredDate.toISOString(),
           preferred_time: formData.preferredTime,
-          session_type: formData.sessionType as 'individual' | 'group' | 'crisis',
-          urgency_level: formData.urgencyLevel as 'low' | 'medium' | 'high' | 'crisis',
+          session_type: formData.sessionType,
+          urgency_level: formData.urgencyLevel,
           contact_phone: formData.contactPhone,
           topic_areas: formData.topicAreas,
           additional_notes: formData.additionalNotes,
@@ -91,7 +111,7 @@ const Booking = () => {
   };
 
   const handleTopicToggle = (topic: string) => {
-    setFormData((prev: any) => ({
+    setFormData((prev) => ({
       ...prev,
       topicAreas: prev.topicAreas.includes(topic)
         ? prev.topicAreas.filter((t: string) => t !== topic)
@@ -252,7 +272,7 @@ const Booking = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="bookingType">Service Type *</Label>
-                    <Select value={formData.bookingType} onValueChange={(value) => setFormData((prev: any) => ({ ...prev, bookingType: value }))}>
+                    <Select value={formData.bookingType} onValueChange={(value: string) => setFormData((prev) => ({ ...prev, bookingType: value }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select service type" />
                       </SelectTrigger>
@@ -267,7 +287,7 @@ const Booking = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="sessionType">Session Type</Label>
-                    <Select value={formData.sessionType} onValueChange={(value) => setFormData((prev: any) => ({ ...prev, sessionType: value }))}>
+                    <Select value={formData.sessionType} onValueChange={(value: BookingFormData['sessionType']) => setFormData((prev) => ({ ...prev, sessionType: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -284,21 +304,21 @@ const Booking = () => {
                     <DayPicker
                       mode="single"
                       selected={formData.preferredDate}
-                      onSelect={(date) => setFormData((prev: any) => ({ ...prev, preferredDate: date }))}
+                      onSelect={(date: Date | undefined) => setFormData((prev) => ({ ...prev, preferredDate: date }))}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="preferredTime">Preferred Time *</Label>
                     <TimePicker
-                      onChange={(time) => setFormData((prev: any) => ({ ...prev, preferredTime: time }))}
+                      onChange={(time: string | null) => setFormData((prev) => ({ ...prev, preferredTime: time }))}
                       value={formData.preferredTime}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="urgencyLevel">Urgency Level</Label>
-                    <Select value={formData.urgencyLevel} onValueChange={(value) => setFormData((prev: any) => ({ ...prev, urgencyLevel: value }))}>
+                    <Select value={formData.urgencyLevel} onValueChange={(value: BookingFormData['urgencyLevel']) => setFormData((prev) => ({ ...prev, urgencyLevel: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -316,7 +336,7 @@ const Booking = () => {
                     <Input
                       type="tel"
                       value={formData.contactPhone}
-                      onChange={(e) => setFormData((prev: any) => ({ ...prev, contactPhone: e.target.value }))}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, contactPhone: e.target.value }))}
                       placeholder="(555) 123-4567"
                     />
                   </div>
@@ -344,7 +364,7 @@ const Booking = () => {
                   <Label htmlFor="additionalNotes">Additional Notes</Label>
                   <Textarea
                     value={formData.additionalNotes}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, additionalNotes: e.target.value }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, additionalNotes: e.target.value }))}
                     placeholder="Please share any additional information that might help us prepare for your session..."
                     rows={4}
                   />
