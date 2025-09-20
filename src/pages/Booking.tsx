@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,6 +43,11 @@ const Booking = () => {
     additionalNotes: ""
   });
 
+  useEffect(() => {
+    // Reset time when date changes to avoid invalid time values
+    setFormData(prev => ({ ...prev, preferredTime: '10:00' }));
+  }, [formData.preferredDate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -54,14 +59,19 @@ const Booking = () => {
       return;
     }
 
-    if (!formData.preferredDate) {
+    if (!formData.preferredDate || !formData.preferredTime) {
       toast({
-        title: "Please select a date",
-        description: "You must choose a preferred date for your appointment.",
+        title: "Please select a date and time",
+        description: "You must choose a preferred date and time for your appointment.",
         variant: "destructive",
       });
       return;
     }
+
+    const [hours, minutes] = formData.preferredTime.split(':');
+    const preferredDateTime = new Date(formData.preferredDate);
+    preferredDateTime.setHours(parseInt(hours, 10));
+    preferredDateTime.setMinutes(parseInt(minutes, 10));
 
     setLoading(true);
     try {
@@ -70,7 +80,7 @@ const Booking = () => {
         .insert({
           user_id: user.id,
           booking_type: formData.bookingType,
-          preferred_date: formData.preferredDate.toISOString(),
+          preferred_date: preferredDateTime.toISOString(),
           preferred_time: formData.preferredTime,
           session_type: formData.sessionType,
           urgency_level: formData.urgencyLevel,
@@ -84,7 +94,7 @@ const Booking = () => {
 
       toast({
         title: "Booking submitted! 📅",
-        description: "Your appointment request has been received. We\'ll contact you within 24 hours.",
+        description: "Your appointment request has been received. We'll contact you within 24 hours.",
       });
 
       // Reset form
@@ -223,8 +233,7 @@ const Booking = () => {
                   <Shield className="h-4 w-4 text-blue-500" />
                   <span>Emergency intervention</span>
                 </div>
-                <div className="flex items-center space-x-3 text-sm">
-                  <Users className="h-4 w-4 text-purple-500" />
+                <div className="flex items-center space-x-3 text-.tsx-purple-500" />
                   <span>Trained crisis counselors</span>
                 </div>
               </CardContent>
