@@ -357,7 +357,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className.tsxassName="shadow-soft border-border/50">
+            <Card className="shadow-soft border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Heart className="h-5 w-5" />
