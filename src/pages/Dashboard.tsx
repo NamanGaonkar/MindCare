@@ -119,7 +119,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               {chartData.barChart.length > 0 ? <DailyActivityBarChart data={chartData.barChart} /> : <p>No activity data yet.</p>}
-            </CradContent>
+            </CardContent>
           </Card>
         </div>
       </main>
