@@ -233,7 +233,8 @@ const Booking = () => {
                   <Shield className="h-4 w-4 text-blue-500" />
                   <span>Emergency intervention</span>
                 </div>
-                <div className="flex items-center space-x-3 text-.tsx-purple-500" />
+                <div className="flex items-center space-x-3 text-sm">
+                  <Users className="h-4 w-4 text-purple-500" />
                   <span>Trained crisis counselors</span>
                 </div>
               </CardContent>
