@@ -1,23 +1,26 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Loader2, Brain, User, Sparkles, Trash2 } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
+import { Send, Loader2, Brain, User, Sparkles, Trash2, MessageSquare } from "lucide-react";
 
 interface ChatMessage {
   id: string;
   message: string;
   sender_type: 'user' | 'ai';
   created_at: string;
+}
+
+interface ChatSession {
+  id: string;
+  created_at: string;
+  last_message: string;
 }
 
 const Chat = () => {
@@ -27,51 +30,56 @@ const Chat = () => {
   const [currentMessage, setCurrentMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [moodRating, setMoodRating] = useState(5);
+  const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Load chat from local storage on component mount
   useEffect(() => {
     if (user) {
-      const storedSessionId = localStorage.getItem(`chat_session_id_${user.id}`);
-      const storedMessages = localStorage.getItem(`chat_messages_${user.id}`);
-
-      if (storedSessionId) {
-        setSessionId(storedSessionId);
-      }
-      if (storedMessages) {
-        setMessages(JSON.parse(storedMessages));
-      }
+      loadChatHistory();
     }
   }, [user]);
 
-  // Save chat to local storage whenever it changes
-  useEffect(() => {
-    if (user && sessionId) {
-      localStorage.setItem(`chat_session_id_${user.id}`, sessionId);
+  const loadChatHistory = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('chat_sessions')
+      .select('id, created_at, last_message')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast({ title: "Error loading chat history", description: error.message, variant: "destructive" });
+    } else {
+      setChatHistory(data || []);
     }
-    if (user && messages.length > 0) {
-      localStorage.setItem(`chat_messages_${user.id}`, JSON.stringify(messages));
+  };
+
+  const loadSessionMessages = async (sessionId: string) => {
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .select('id, message, sender_type, created_at')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      toast({ title: "Error loading session", description: error.message, variant: "destructive" });
+      return;
     }
-  }, [user, sessionId, messages]);
+    setMessages(data || []);
+    setSessionId(sessionId);
+    setShowHistory(false);
+  };
 
 
   const sendMessage = async () => {
-    if (!currentMessage.trim() || !user ) return;
+    if (!currentMessage.trim() || !user) return;
 
     const userMessageContent = currentMessage.trim();
-    const userMessage: ChatMessage = {
-        id: `user_${Date.now()}`,
-        message: userMessageContent,
-        sender_type: 'user',
-        created_at: new Date().toISOString(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
     setCurrentMessage("");
     setIsLoading(true);
     
@@ -81,45 +89,63 @@ const Chat = () => {
         setSessionId(currentSessionId);
       }
 
+      // Add user message to state immediately
+      const userMessage: ChatMessage = {
+        id: `user_${Date.now()}`,
+        message: userMessageContent,
+        sender_type: 'user',
+        created_at: new Date().toISOString(),
+      };
+      setMessages(prev => [...prev, userMessage]);
+
       const { data, error } = await supabase.functions.invoke('chat-with-gemini', {
         body: { 
           message: userMessageContent, 
-          sessionId: currentSessionId, 
-          moodRating: moodRating 
+          sessionId: currentSessionId
         },
       });
 
       if (error) throw new Error(error.message);
       if (data.error) throw new Error(data.error);
 
-      const aiMessage: ChatMessage = {
-          id: `ai_${Date.now()}`,
-          message: data.response,
-          sender_type: 'ai',
-          created_at: new Date().toISOString(),
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
+      // The AI message is now added via realtime subscription
 
     } catch (error: any) {
       toast({ title: "Message Failed", description: error.message, variant: "destructive" });
-      setMessages(prev => prev.slice(0, -1));
+      // remove the user message if the call fails
+      setMessages(prev => prev.slice(0, -1)); 
     } finally {
       setIsLoading(false);
+      loadChatHistory(); // Refresh history to show new/updated session
     }
   };
 
-  const clearChatHistory = () => {
-    if (user) {
-      localStorage.removeItem(`chat_session_id_${user.id}`);
-      localStorage.removeItem(`chat_messages_${user.id}`);
-      setMessages([]);
-      setSessionId(null);
-      toast({ title: "Chat history cleared." });
-    }
+  const clearCurrentChat = () => {
+    setMessages([]);
+    setSessionId(null);
+    toast({ title: "Current chat cleared." });
   };
 
   useEffect(scrollToBottom, [messages]);
+
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const channel = supabase
+      .channel(`chat-messages:${sessionId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${sessionId}` },
+        (payload) => {
+          setMessages(prev => [...prev, payload.new as ChatMessage]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [sessionId]);
 
   if (authLoading) {
     return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
@@ -134,7 +160,6 @@ const Chat = () => {
             <p className="text-lg text-muted-foreground mb-8">Please sign in to start a confidential conversation with our AI assistant.</p>
             <AuthModal><Button size="lg">Sign In to Chat</Button></AuthModal>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -143,27 +168,29 @@ const Chat = () => {
     <div className="flex h-screen flex-col bg-muted/20">
       <Navigation />
       <div className="flex-1 overflow-hidden">
-        <div className="h-full flex flex-col max-w-4xl mx-auto py-4">
+        <div className="h-full flex max-w-7xl mx-auto py-4 gap-4">
+          <Card className={`w-1/3 transition-all duration-300 ${showHistory ? 'block' : 'hidden'} md:block`}>
+            <CardHeader>
+              <CardTitle>Chat History</CardTitle>
+            </CardHeader>
+            <ScrollArea className="h-[calc(100%-4rem)] p-4">
+              {chatHistory.map(session => (
+                <div key={session.id} className="mb-2 cursor-pointer p-2 rounded-lg hover:bg-muted" onClick={() => loadSessionMessages(session.id)}>
+                  <p className="font-semibold truncate">{session.last_message || 'New Session'}</p>
+                  <p className="text-xs text-muted-foreground">{new Date(session.created_at).toLocaleString()}</p>
+                </div>
+              ))}
+            </ScrollArea>
+          </Card>
+
+          <div className="flex-1 flex flex-col">
             <Card className="flex-1 flex flex-col border-border/50 shadow-sm">
                 <CardHeader className="border-b">
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2"><Brain className="text-primary" />MindCare AI Assistant</CardTitle>
-                      <Button variant="outline" size="sm" onClick={clearChatHistory}><Trash2 className="h-4 w-4 mr-2"/>Clear History</Button>
-                    </div>
-                    <div className="pt-4">
-                      <Label htmlFor="mood-slider" className="mb-2 block text-sm font-medium text-muted-foreground">How are you feeling right now?</Label>
-                      <div className="flex items-center gap-4">
-                        <span className="text-2xl">😞</span>
-                        <Slider 
-                          id="mood-slider"
-                          min={1} 
-                          max={10} 
-                          step={1} 
-                          value={[moodRating]} 
-                          onValueChange={(value) => setMoodRating(value[0])} 
-                          disabled={messages.length > 0} // Disable slider after first message
-                        />
-                        <span className="text-2xl">😄</span>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setShowHistory(!showHistory)} className="md:hidden"><MessageSquare className="h-4 w-4"/></Button>
+                        <Button variant="outline" size="sm" onClick={clearCurrentChat}><Trash2 className="h-4 w-4 mr-2"/>New Chat</Button>
                       </div>
                     </div>
                 </CardHeader>
@@ -172,7 +199,7 @@ const Chat = () => {
                         <div className="space-y-6">
                             {messages.length === 0 && (
                                 <div className="text-center text-muted-foreground pt-16">
-                                    <p>No messages yet. Adjust the slider and send a message to start.</p>
+                                    <p>No messages yet. Send a message to start.</p>
                                 </div>
                             )}
                             {messages.map((msg) => (
@@ -211,9 +238,10 @@ const Chat = () => {
                             <Send className="h-4 w-4" />
                         </Button>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2 text-center">Your conversation is private and secure. If you are in a crisis, please call 911 or a helpline.</p>
+                    <p className="text-xs text-muted-foreground mt-2 text-center">Your conversation is private and secure. If you are in a crisis, please call a helpline. In India, you can call 112 (emergency), 108 (medical), or 104 (health advice).</p>
                 </div>
             </Card>
+        </div>
         </div>
       </div>
     </div>

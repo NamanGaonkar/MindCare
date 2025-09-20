@@ -1,6 +1,7 @@
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Book, MessageCircle, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   const { theme } = useTheme();
@@ -33,12 +34,16 @@ const HeroSection = () => {
           Connect with support, access resources, and prioritize your mental health in a stigma-free environment designed just for students.
         </p>
         <div className="mt-10 flex justify-center gap-4">
-          <Button size="lg" className="text-lg px-8 py-4">
-            Start Chat Support <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-          <Button size="lg" variant="outline" className={`text-lg px-8 py-4 ${isLight ? 'border-primary text-primary hover:bg-primary/5' : 'text-white border-white hover:bg-white/10'}`}>
-            <Book className="mr-2 h-5 w-5" /> Book Appointment
-          </Button>
+            <Button asChild size="lg" className="text-lg px-8 py-4">
+                <Link to="/chat">
+                    Start Chat Support <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className={`text-lg px-8 py-4 ${isLight ? 'border-primary text-primary hover:bg-primary/5' : 'text-white border-white hover:bg-white/10'}`}>
+                <Link to="/booking">
+                    <Book className="mr-2 h-5 w-5" /> Book Appointment
+                </Link>
+            </Button>
         </div>
       </div>
       <div className="relative container mx-auto px-4 pt-24 pb-12">

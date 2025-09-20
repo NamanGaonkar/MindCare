@@ -9,6 +9,8 @@ import { Award, Calendar, MessageSquare, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { SessionTypePieChart, DailyActivityBarChart } from "@/components/Charts";
+import MoodTracker from "@/components/MoodTracker";
+import Journaling from "@/components/Journaling";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -95,6 +97,11 @@ const Dashboard = () => {
           ))}
         </div>
 
+        <div className="grid gap-8 md:grid-cols-2 mb-8">
+          <MoodTracker />
+          <Journaling />
+        </div>
+
         <div className="grid gap-8 md:grid-cols-2">
           <Card>
             <CardHeader>
@@ -112,7 +119,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               {chartData.barChart.length > 0 ? <DailyActivityBarChart data={chartData.barChart} /> : <p>No activity data yet.</p>}
-            </CardContent>
+            </CradContent>
           </Card>
         </div>
       </main>
