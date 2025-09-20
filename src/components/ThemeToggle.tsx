@@ -1,31 +1,21 @@
-import { Moon, Sun, Palette } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
+import { Switch } from "@/components/ui/switch";
 
 export function ThemeToggle() {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+
+  const isDarkMode = theme === "dark";
+
+  const toggleTheme = (isChecked: boolean) => {
+    setTheme(isChecked ? "dark" : "light");
+  };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Palette className="h-[1.2rem] w-[1.2rem]" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("orange")}>Orange</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("sky")}>Sky</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("mint")}>Mint</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("rose")}>Rose</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>Dark</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center space-x-2">
+      <Sun className="h-5 w-5" />
+      <Switch id="theme-toggle" checked={isDarkMode} onCheckedChange={toggleTheme} />
+      <Moon className="h-5 w-5" />
+    </div>
   );
 }
