@@ -206,6 +206,19 @@ CREATE POLICY "Users can update their own responses"
 ON public.peer_support_responses FOR UPDATE 
 USING (auth.uid() = user_id);
 
+
+-- Add policies for journal_entries
+CREATE POLICY "Enable ALL for users based on user_id" ON "public"."journal_entries" AS PERMISSIVE FOR ALL TO public USING ((auth.uid() = user_id)) WITH CHECK ((auth.uid() = user_id));
+
+-- Add policies for mood_entries
+CREATE POLICY "Enable ALL for users based on user_id" ON "public"."mood_entries" AS PERMISSIVE FOR ALL TO public USING ((auth.uid() = user_id)) WITH CHECK ((auth.uid() = user_id));
+
+-- Add policies for peer_support_posts
+CREATE POLICY "Enable ALL for users based on user_id" ON "public"."peer_support_posts" AS PERMISSIVE FOR ALL TO public USING ((auth.uid() = user_id)) WITH CHECK ((auth.uid() = user_id));
+
+-- Add policies for peer_support_reactions
+CREATE POLICY "Enable ALL for users based on user_id" ON "public"."peer_support_reactions" AS PERMISSIVE FOR ALL TO public USING ((auth.uid() = user_id)) WITH CHECK ((auth.uid() = user_id));
+
 -- Create function to update timestamps
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER AS $$
