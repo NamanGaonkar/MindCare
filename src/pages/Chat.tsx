@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Loader2, Brain, User, Sparkles } from "lucide-react";
+import { Send, Loader2, Brain, User, Sparkles, Trash2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 
@@ -34,11 +34,11 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Load chat from session storage on component mount
+  // Load chat from local storage on component mount
   useEffect(() => {
     if (user) {
-      const storedSessionId = sessionStorage.getItem(`chat_session_id_${user.id}`);
-      const storedMessages = sessionStorage.getItem(`chat_messages_${user.id}`);
+      const storedSessionId = localStorage.getItem(`chat_session_id_${user.id}`);
+      const storedMessages = localStorage.getItem(`chat_messages_${user.id}`);
 
       if (storedSessionId) {
         setSessionId(storedSessionId);
@@ -49,13 +49,13 @@ const Chat = () => {
     }
   }, [user]);
 
-  // Save chat to session storage whenever it changes
+  // Save chat to local storage whenever it changes
   useEffect(() => {
     if (user && sessionId) {
-      sessionStorage.setItem(`chat_session_id_${user.id}`, sessionId);
+      localStorage.setItem(`chat_session_id_${user.id}`, sessionId);
     }
     if (user && messages.length > 0) {
-      sessionStorage.setItem(`chat_messages_${user.id}`, JSON.stringify(messages));
+      localStorage.setItem(`chat_messages_${user.id}`, JSON.stringify(messages));
     }
   }, [user, sessionId, messages]);
 
@@ -109,6 +109,16 @@ const Chat = () => {
     }
   };
 
+  const clearChatHistory = () => {
+    if (user) {
+      localStorage.removeItem(`chat_session_id_${user.id}`);
+      localStorage.removeItem(`chat_messages_${user.id}`);
+      setMessages([]);
+      setSessionId(null);
+      toast({ title: "Chat history cleared." });
+    }
+  };
+
   useEffect(scrollToBottom, [messages]);
 
   if (authLoading) {
@@ -136,7 +146,10 @@ const Chat = () => {
         <div className="h-full flex flex-col max-w-4xl mx-auto py-4">
             <Card className="flex-1 flex flex-col border-border/50 shadow-sm">
                 <CardHeader className="border-b">
-                    <CardTitle className="flex items-center gap-2"><Brain className="text-primary" />MindCare AI Assistant</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2"><Brain className="text-primary" />MindCare AI Assistant</CardTitle>
+                      <Button variant="outline" size="sm" onClick={clearChatHistory}><Trash2 className="h-4 w-4 mr-2"/>Clear History</Button>
+                    </div>
                     <div className="pt-4">
                       <Label htmlFor="mood-slider" className="mb-2 block text-sm font-medium text-muted-foreground">How are you feeling right now?</Label>
                       <div className="flex items-center gap-4">
