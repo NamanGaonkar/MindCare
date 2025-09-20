@@ -1,6 +1,6 @@
-#  MindCare
+#  MindfulMate
 
-MindCare is a digital mental health and psychological support system for students in higher education.  
+MindfulMate is a digital mental health and psychological support system for students in higher education.  
 It helps students access stigma-free support, self-help resources, and professional guidance while giving institutions insights into student wellbeing.
 
 ---
@@ -18,4 +18,4 @@ It helps students access stigma-free support, self-help resources, and professio
 - Frontend: React + TailwindCSS  
 - Backend & Auth: Supabase  
 - AI: Google Gemini API  
-- Deployment: Vercel  
+- Deployment: Vercel

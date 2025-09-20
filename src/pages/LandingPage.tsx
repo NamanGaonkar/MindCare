@@ -1,5 +1,6 @@
 import { ArrowRight, Book, MessageCircle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import BookingOptions from "@/components/BookingOptions";
 
 const LandingPage = () => {
   return (
@@ -28,29 +29,38 @@ const LandingPage = () => {
               </Button>
             </div>
           </div>
-          <div className="relative container mx-auto px-4 pt-24 pb-12">
-            <div className="grid md:grid-cols-3 gap-12">
-              <div className="flex flex-col items-center text-center text-foreground">
-                <div className="bg-primary/10 rounded-full p-5">
-                  <ShieldCheck className="h-10 w-10 text-primary" />
+        </section>
+        
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <BookingOptions />
+          </div>
+        </section>
+
+        <section className="py-20 bg-muted/20">
+          <div className="container mx-auto px-4">
+            <div className="grid md:grid-cols-3 gap-12 text-center">
+                <div className="flex flex-col items-center">
+                  <div className="bg-primary/10 rounded-full p-5">
+                    <ShieldCheck className="h-10 w-10 text-primary" />
+                  </div>
+                  <h3 className="mt-5 text-2xl font-bold">Confidential</h3>
+                  <p className="mt-3 text-muted-foreground">Your privacy is our priority.</p>
                 </div>
-                <h3 className="mt-5 text-2xl font-bold">Confidential</h3>
-                <p className="mt-3">Your privacy is our priority.</p>
-              </div>
-              <div className="flex flex-col items-center text-center text-foreground">
-                <div className="bg-primary/10 rounded-full p-5">
-                  <MessageCircle className="h-10 w-10 text-primary" />
+                <div className="flex flex-col items-center">
+                  <div className="bg-primary/10 rounded-full p-5">
+                    <MessageCircle className="h-10 w-10 text-primary" />
+                  </div>
+                  <h3 className="mt-5 text-2xl font-bold">24/7 Support</h3>
+                  <p className="mt-3 text-muted-foreground">Available whenever you need us.</p>
                 </div>
-                <h3 className="mt-5 text-2xl font-bold">24/7 Support</h3>
-                <p className="mt-3">Available whenever you need us.</p>
-              </div>
-              <div className="flex flex-col items-center text-center text-foreground">
-                <div className="bg-primary/10 rounded-full p-5">
-                  <Book className="h-10 w-10 text-primary" />
+                <div className="flex flex-col items-center">
+                  <div className="bg-primary/10 rounded-full p-5">
+                    <Book className="h-10 w-10 text-primary" />
+                  </div>
+                  <h3 className="mt-5 text-2xl font-bold">Professional Care</h3>
+                  <p className="mt-3 text-muted-foreground">Licensed counselors ready to help.</p>
                 </div>
-                <h3 className="mt-5 text-2xl font-bold">Professional Care</h3>
-                <p className="mt-3">Licensed counselors ready to help.</p>
-              </div>
             </div>
           </div>
         </section>
