@@ -94,7 +94,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </motion.div>
-          ))affes}
+          ))}
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 mb-8">
@@ -116,7 +116,7 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle>Daily Activity</CardTitle>
               <CardDescription>Your recent sessions and posts.</CardDescription>
-            </EadHeader>
+            </CardHeader>
             <CardContent>
               {chartData.barChart.length > 0 ? <DailyActivityBarChart data={chartData.barChart} /> : <p>No activity data yet.</p>}
             </CardContent>
