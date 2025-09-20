@@ -1,0 +1,1 @@
+ALTER TABLE peer_support_posts DROP COLUMN temp_column;

@@ -77,7 +77,7 @@ const Dashboard = () => {
       <Navigation />
       <main className="container px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
-          <h1 className="text-3xl font-bold">Welcome, {user?.user_metadata?.name || 'User'}</h1>
+          <h1 className="text-3xl font-bold">Welcome, {user?.user_metadata?.full_name || 'User'}</h1>
           <p className="text-muted-foreground">Here is your mental wellness dashboard.</p>
         </motion.div>
 
@@ -94,7 +94,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </motion.div>
-          ))}
+          ))affes}
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 mb-8">
@@ -116,7 +116,7 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle>Daily Activity</CardTitle>
               <CardDescription>Your recent sessions and posts.</CardDescription>
-            </CardHeader>
+            </EadHeader>
             <CardContent>
               {chartData.barChart.length > 0 ? <DailyActivityBarChart data={chartData.barChart} /> : <p>No activity data yet.</p>}
             </CardContent>

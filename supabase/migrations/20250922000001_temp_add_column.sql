@@ -1,0 +1,1 @@
+ALTER TABLE peer_support_posts ADD COLUMN temp_column TEXT;
