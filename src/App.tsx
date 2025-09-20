@@ -11,6 +11,7 @@ import Resources from "./pages/Resources";
 import PeerSupport from "./pages/PeerSupport";
 import PostDetails from "./pages/PostDetails";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/peer-support" element={<PeerSupport />} />
             <Route path="/peer-support/:id" element={<PostDetails />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

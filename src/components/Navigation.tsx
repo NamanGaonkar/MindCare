@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Brain, MessageCircle, Calendar, BookOpen, Users, LayoutDashboard } from "lucide-react";
+import { Menu, X, Brain, MessageCircle, Calendar, BookOpen, Users, LayoutDashboard, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,6 +18,7 @@ const Navigation = () => {
     { title: "Resources", href: "/resources", icon: BookOpen },
     { title: "Community", href: "/peer-support", icon: Users },
     { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { title: "Admin", href: "/admin", icon: Shield },
   ];
 
   return (

@@ -1,5 +1,5 @@
 -- Create missing peer support tables
-CREATE TABLE public.peer_support_reactions (
+CREATE TABLE IF NOT EXISTS public.peer_support_reactions (
     id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     post_id UUID NOT NULL,
     user_id UUID NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE public.peer_support_reactions (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.peer_support_comments (
+CREATE TABLE IF NOT EXISTS public.peer_support_comments (
     id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     post_id UUID NOT NULL,
     user_id UUID NOT NULL,
@@ -21,37 +21,44 @@ ALTER TABLE public.peer_support_reactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.peer_support_comments ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for reactions
+DROP POLICY IF EXISTS "Users can view all reactions" ON public.peer_support_reactions;
 CREATE POLICY "Users can view all reactions" 
 ON public.peer_support_reactions 
 FOR SELECT 
 USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Users can create reactions" ON public.peer_support_reactions;
 CREATE POLICY "Users can create reactions" 
 ON public.peer_support_reactions 
 FOR INSERT 
 WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own reactions" ON public.peer_support_reactions;
 CREATE POLICY "Users can delete their own reactions" 
 ON public.peer_support_reactions 
 FOR DELETE 
 USING (auth.uid() = user_id);
 
 -- Create RLS policies for comments
+DROP POLICY IF EXISTS "Users can view all comments" ON public.peer_support_comments;
 CREATE POLICY "Users can view all comments" 
 ON public.peer_support_comments 
 FOR SELECT 
 USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Users can create comments" ON public.peer_support_comments;
 CREATE POLICY "Users can create comments" 
 ON public.peer_support_comments 
 FOR INSERT 
 WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own comments" ON public.peer_support_comments;
 CREATE POLICY "Users can update their own comments" 
 ON public.peer_support_comments 
 FOR UPDATE 
 USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own comments" ON public.peer_support_comments;
 CREATE POLICY "Users can delete their own comments" 
 ON public.peer_support_comments 
 FOR DELETE 
@@ -63,6 +70,7 @@ ALTER TABLE public.counseling_bookings ADD CONSTRAINT counseling_bookings_bookin
 CHECK (booking_type IN ('campus_counseling', 'crisis_support', 'group_therapy', 'consultation'));
 
 -- Create trigger for comments updated_at
+DROP TRIGGER IF EXISTS update_peer_support_comments_updated_at ON public.peer_support_comments;
 CREATE TRIGGER update_peer_support_comments_updated_at
 BEFORE UPDATE ON public.peer_support_comments
 FOR EACH ROW
