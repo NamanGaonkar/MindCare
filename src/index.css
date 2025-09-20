@@ -3,96 +3,88 @@
 @tailwind utilities;
 
 @layer base {
-:root {
-    /* White and Orange Theme */
+  :root, .theme-orange {
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-
+    --foreground: 24 9.8% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-
+    --card-foreground: 24 9.8% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-
-    --primary: 24 98% 51%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 24 98% 95%;
-    --secondary-foreground: 24 98% 51%;
-    
-    --accent: 24 98% 95%;
-    --accent-foreground: 24 98% 51%;
-
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-
-    --success: 142.1 76.2% 36.3%;
-    --success-foreground: 0 0% 98%;
-    
-    --warning: 47.9 95.8% 53.1%;
-    --warning-foreground: 0 0% 98%;
-
+    --popover-foreground: 24 9.8% 10%;
+    --primary: 24.6 95% 53.1%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --secondary: 60 4.8% 95.9%;
+    --secondary-foreground: 24 9.8% 10%;
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
+    --accent: 60 4.8% 95.9%;
+    --accent-foreground: 24 9.8% 10%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 24 98% 51%;
-
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 60 5.9% 90%;
+    --input: 60 5.9% 90%;
+    --ring: 24.6 95% 53.1%;
     --radius: 0.5rem;
+  }
 
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
-    --gradient-button: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(24 98% 40%));
+  .theme-sky {
+    --background: 204 20% 98%;
+    --foreground: 215 25% 27%;
+    --card: 210 30% 96%;
+    --card-foreground: 215 25% 27%;
+    --primary: 205 90% 45%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 30% 90%;
+    --secondary-foreground: 215 25% 27%;
+    --accent: 210 40% 80%;
+    --accent-foreground: 215 25% 27%;
+  }
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 3.9%;
-    --sidebar-primary: 24 98% 51%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 24 98% 95%;
-    --sidebar-accent-foreground: 24 98% 51%;
-    --sidebar-border: 0 0% 89.8%;
-    --sidebar-ring: 24 98% 51%;
+  .theme-mint {
+    --background: 150 20% 98%;
+    --foreground: 150 25% 27%;
+    --card: 150 30% 96%;
+    --card-foreground: 150 25% 27%;
+    --primary: 150 70% 40%;
+    --primary-foreground: 150 40% 98%;
+    --secondary: 150 30% 90%;
+    --secondary-foreground: 150 25% 27%;
+    --accent: 150 40% 80%;
+    --accent-foreground: 150 25% 27%;
+  }
+
+  .theme-rose {
+    --background: 340 20% 98%;
+    --foreground: 340 25% 27%;
+    --card: 340 30% 96%;
+    --card-foreground: 340 25% 27%;
+    --primary: 340 80% 55%;
+    --primary-foreground: 340 40% 98%;
+    --secondary: 340 30% 90%;
+    --secondary-foreground: 340 25% 27%;
+    --accent: 340 40% 80%;
+    --accent-foreground: 340 25% 27%;
   }
 
   .dark {
-    /* Orange and Black Theme */
-    --background: 0 0% 3.9%;
+    --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
-
-    --card: 0 0% 3.9%;
+    --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
-
-    --popover: 0 0% 3.9%;
+    --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-
-    --primary: 24 98% 51%;
-    --primary-foreground: 0 0% 9%;
-
-    --secondary: 0 0% 14.9%;
+    --primary: 24.6 95% 53.1%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-
-    --accent: 0 0% 14.9%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 24 98% 51%;
-
-    --sidebar-background: 0 0% 3.9%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 24 98% 51%;
-    --sidebar-primary-foreground: 0 0% 9%;
-    --sidebar-accent: 0 0% 14.9%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 14.9%;
-    --sidebar-ring: 24 98% 51%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 24.6 95% 53.1%;
   }
 }
 
@@ -100,9 +92,14 @@
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .card, .btn {
+    @apply animate-fade-in;
+  }
+  .nav-item {
+    @apply animate-slide-in-from-left;
   }
 }

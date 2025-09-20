@@ -1,6 +1,4 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Twitter, Instagram, Facebook } from "lucide-react";
 
 const Footer = () => {
   const navLinks = [
@@ -11,18 +9,12 @@ const Footer = () => {
     { title: "Privacy Policy", href: "/privacy" },
   ];
 
-  const socialLinks = [
-    { icon: Twitter, href: "#" },
-    { icon: Instagram, href: "#" },
-    { icon: Facebook, href: "#" },
-  ];
-
   return (
     <footer className="bg-muted/50 border-t border-border/40">
       <div className="container py-12 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Logo and Description */}
-          <div className="col-span-1 md:col-span-1">
+          <div className="col-span-1">
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary">
@@ -49,30 +41,6 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
-          </div>
-
-          {/* Social Media */}
-          <div className="col-span-1">
-            <h3 className="font-semibold text-foreground mb-4">Follow Us</h3>
-            <div className="flex items-center space-x-4">
-              {socialLinks.map((social, index) => (
-                <Link key={index} to={social.href} className="text-muted-foreground hover:text-primary transition-colors">
-                  <social.icon className="h-5 w-5" />
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Newsletter */}
-          <div className="col-span-1">
-            <h3 className="font-semibold text-foreground mb-4">Newsletter</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Subscribe for wellness tips and updates.
-            </p>
-            <div className="flex w-full max-w-sm items-center space-x-2">
-              <input type="email" placeholder="Email" className="flex-1 p-2 border border-border rounded-md" />
-              <Button type="submit" size="sm">Subscribe</Button>
-            </div>
           </div>
         </div>
 

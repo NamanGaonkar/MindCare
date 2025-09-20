@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Loader2, Brain, AlertTriangle, User, Sparkles } from "lucide-react";
+import { Send, Loader2, Brain, User, Sparkles } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 
 interface ChatMessage {
   id: string;
@@ -25,38 +27,41 @@ const Chat = () => {
   const [currentMessage, setCurrentMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [moodRating, setMoodRating] = useState(5);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const loadChatHistory = useCallback(async (sid: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('session_id', sid)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      setMessages((data || []) as ChatMessage[]);
-    } catch (error: any) {
-      toast({ title: "Error Loading History", description: error.message, variant: "destructive" });
-    }
-  }, [toast]);
-
-  // Effect to initialize session
+  // Load chat from session storage on component mount
   useEffect(() => {
-    if (user && !sessionId) {
-      // A simple way to create a session ID
-      const newSessionId = `session_${user.id}_${Date.now()}`;
-      setSessionId(newSessionId);
+    if (user) {
+      const storedSessionId = sessionStorage.getItem(`chat_session_id_${user.id}`);
+      const storedMessages = sessionStorage.getItem(`chat_messages_${user.id}`);
+
+      if (storedSessionId) {
+        setSessionId(storedSessionId);
+      }
+      if (storedMessages) {
+        setMessages(JSON.parse(storedMessages));
+      }
     }
-  }, [user, sessionId]);
+  }, [user]);
+
+  // Save chat to session storage whenever it changes
+  useEffect(() => {
+    if (user && sessionId) {
+      sessionStorage.setItem(`chat_session_id_${user.id}`, sessionId);
+    }
+    if (user && messages.length > 0) {
+      sessionStorage.setItem(`chat_messages_${user.id}`, JSON.stringify(messages));
+    }
+  }, [user, sessionId, messages]);
+
 
   const sendMessage = async () => {
-    if (!currentMessage.trim() || !user || !sessionId) return;
+    if (!currentMessage.trim() || !user ) return;
 
     const userMessageContent = currentMessage.trim();
     const userMessage: ChatMessage = {
@@ -71,27 +76,21 @@ const Chat = () => {
     setIsLoading(true);
     
     try {
+      const currentSessionId = sessionId || `session_${user.id}_${Date.now()}`;
+      if (!sessionId) {
+        setSessionId(currentSessionId);
+      }
+
       const { data, error } = await supabase.functions.invoke('chat-with-gemini', {
         body: { 
           message: userMessageContent, 
-          sessionId, 
-          moodRating: 5 // Default mood rating, can be updated with a UI element
+          sessionId: currentSessionId, 
+          moodRating: moodRating 
         },
       });
 
-      if (error) {
-        console.error('Function invoke error:', error);
-        throw new Error(`Function Error: ${error.message}`);
-      }
-
-      if (data.error) {
-        console.error('Function execution error:', data.details);
-        throw new Error(`AI Error: ${data.error} - ${data.details || ''}`);
-      }
-      
-      if (!data.response) {
-        throw new Error("No response from AI assistant.");
-      }
+      if (error) throw new Error(error.message);
+      if (data.error) throw new Error(data.error);
 
       const aiMessage: ChatMessage = {
           id: `ai_${Date.now()}`,
@@ -102,24 +101,9 @@ const Chat = () => {
 
       setMessages(prev => [...prev, aiMessage]);
 
-      if (data.containsCrisis) {
-        toast({
-            title: "Crisis Support Resources",
-            description: "It sounds like you are going through a difficult time. Please know there is support available.",
-            variant: "destructive",
-            duration: 10000,
-        });
-      }
-      
-      // If this was the first message, the session ID might have been created on the backend
-      if (data.sessionId && !sessionId) {
-        setSessionId(data.sessionId);
-      }
-
     } catch (error: any) {
       toast({ title: "Message Failed", description: error.message, variant: "destructive" });
-      // Revert optimistic update on failure
-      setMessages(prev => prev.filter(m => m.id !== userMessage.id)); 
+      setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }
@@ -153,14 +137,29 @@ const Chat = () => {
             <Card className="flex-1 flex flex-col border-border/50 shadow-sm">
                 <CardHeader className="border-b">
                     <CardTitle className="flex items-center gap-2"><Brain className="text-primary" />MindCare AI Assistant</CardTitle>
-                    <CardDescription>Your confidential space to talk.</CardDescription>
+                    <div className="pt-4">
+                      <Label htmlFor="mood-slider" className="mb-2 block text-sm font-medium text-muted-foreground">How are you feeling right now?</Label>
+                      <div className="flex items-center gap-4">
+                        <span className="text-2xl">😞</span>
+                        <Slider 
+                          id="mood-slider"
+                          min={1} 
+                          max={10} 
+                          step={1} 
+                          value={[moodRating]} 
+                          onValueChange={(value) => setMoodRating(value[0])} 
+                          disabled={messages.length > 0} // Disable slider after first message
+                        />
+                        <span className="text-2xl">😄</span>
+                      </div>
+                    </div>
                 </CardHeader>
                 <CardContent className="flex-1 p-0">
                     <ScrollArea className="h-full p-6">
                         <div className="space-y-6">
                             {messages.length === 0 && (
                                 <div className="text-center text-muted-foreground pt-16">
-                                    <p>No messages yet. Send a message to start the conversation.</p>
+                                    <p>No messages yet. Adjust the slider and send a message to start.</p>
                                 </div>
                             )}
                             {messages.map((msg) => (

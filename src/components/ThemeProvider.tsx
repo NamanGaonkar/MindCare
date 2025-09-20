@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "light" | "system";
+type Theme = "dark" | "orange" | "sky" | "mint" | "rose" | "system";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -33,19 +33,20 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
-    root.classList.remove("light", "dark");
+    // Remove all theme classes
+    root.classList.remove("theme-orange", "theme-sky", "theme-mint", "theme-rose", "dark");
 
+    let newTheme = theme;
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-
-      root.classList.add(systemTheme);
-      return;
+      newTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "orange";
     }
 
-    root.classList.add(theme);
+    if (newTheme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.add(`theme-${newTheme}`);
+    }
+    
   }, [theme]);
 
   const value = {
