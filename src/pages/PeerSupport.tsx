@@ -35,7 +35,18 @@ const PeerSupport = () => {
     try {
       let query = supabase
         .from('peer_support_posts')
-        .select('*, reactions:peer_support_reactions(user_id)')
+        .select(`
+          id,
+          created_at,
+          title,
+          content,
+          category,
+          is_anonymous,
+          user_id,
+          reactions:peer_support_reactions(user_id),
+          comments:peer_support_comments(count),
+          author:users(user_name)
+        `)
         .order('created_at', { ascending: false });
 
       if (selectedCategory !== 'all') {
@@ -204,12 +215,16 @@ const PeerSupport = () => {
                     <CardContent>
                         <p className="text-muted-foreground mb-4 line-clamp-3">{post.content}</p>
                         <div className="text-xs text-muted-foreground flex items-center justify-between">
-                            <span>{post.is_anonymous ? 'Posted Anonymously' : 'Posted by User'}</span>
+                            <span>{post.is_anonymous ? 'Posted Anonymously' : `Posted by ${post.author.user_name}`}</span>
                             <div className="flex items-center gap-4">
                                <button onClick={() => toggleReaction(post.id)} className="flex items-center gap-1 text-muted-foreground hover:text-pink-500">
                                     <Heart className={`h-4 w-4 ${post.reactions.some(r => r.user_id === user.id) ? 'fill-current text-pink-500' : ''}`} />
                                     {post.reactions.length}
                                 </button>
+                                <Link to={`/peer-support/${post.id}`} className="flex items-center gap-1 text-muted-foreground hover:text-primary">
+                                    <MessageSquare className="h-4 w-4" /> 
+                                    {post.comments[0].count}
+                                </Link>
                                 <span>{new Date(post.created_at).toLocaleString()}</span>
                             </div>
                         </div>

@@ -20,7 +20,7 @@ interface ChatMessage {
 interface ChatSession {
   id: string;
   created_at: string;
-  last_message: string;
+  title: string;
 }
 
 const Chat = () => {
@@ -48,7 +48,7 @@ const Chat = () => {
     if (!user) return;
     const { data, error } = await supabase
       .from('chat_sessions')
-      .select('id, created_at, last_message')
+      .select('id, created_at, title')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -176,7 +176,7 @@ const Chat = () => {
             <ScrollArea className="h-[calc(100%-4rem)] p-4">
               {chatHistory.map(session => (
                 <div key={session.id} className="mb-2 cursor-pointer p-2 rounded-lg hover:bg-muted" onClick={() => loadSessionMessages(session.id)}>
-                  <p className="font-semibold truncate">{session.last_message || 'New Session'}</p>
+                  <p className="font-semibold truncate">{session.title || 'New Session'}</p>
                   <p className="text-xs text-muted-foreground">{new Date(session.created_at).toLocaleString()}</p>
                 </div>
               ))}
