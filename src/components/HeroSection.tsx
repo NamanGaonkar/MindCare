@@ -2,25 +2,28 @@ import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Book, MessageCircle, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import mintBg from "@/assets/mint-theme-background.jpg";
+import skyBg from "@/assets/sky-theme-background.jpg";
+import orangeBg from "@/assets/orange-theme-background.jpg";
+import roseBg from "@/assets/rose-theme-background.jpg";
+import darkBg from "@/assets/dark-theme-background.jpg";
 
 const HeroSection = () => {
   const { theme } = useTheme();
 
-  const backgroundImages = {
-    light: "/src/assets/mint-wave.png",
-    dark: "/src/assets/hero-mental-health.jpg",
-    mint: "/src/assets/mint-wave.png",
+  const getBackgroundImage = () => {
+    if (theme === 'light') return mintBg;
+    if (theme === 'dark') return darkBg;
+    return mintBg; // default
   };
 
-  const backgroundImage = backgroundImages[theme] || backgroundImages.light;
-
-  const isLight = theme === 'light' || theme === 'mint';
+  const isLight = theme === 'light';
   const textColor = isLight ? 'text-foreground' : 'text-white';
 
   return (
     <div
       className="relative bg-cover bg-center py-20"
-      style={{ backgroundImage: `url(${backgroundImage})` }}
+      style={{ backgroundImage: `url(${getBackgroundImage()})` }}
     >
       {!isLight && <div className="absolute inset-0 bg-black/50"></div>}
       <div className="relative container mx-auto px-4 text-center">

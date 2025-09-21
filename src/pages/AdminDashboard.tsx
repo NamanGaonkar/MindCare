@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, LineChart, PieChart } from "lucide-react";
-import { ResponsiveContainer, Pie, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Line } from 'recharts';
+import { Users, CalendarClock, BookOpen } from "lucide-react";
+import { ResponsiveContainer, Pie, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Line, LineChart, PieChart } from 'recharts';
 
 const AdminDashboard = () => {
 

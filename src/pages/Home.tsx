@@ -11,15 +11,10 @@ const Home = () => {
   const { theme } = useTheme();
 
   const getBackgroundImage = () => {
-    switch (theme) {
-      case 'orange':
-        return 'linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url(/src/assets/orange-theme-background.jpg)';
-      case 'sky':
-        return 'linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url(/src/assets/sky-theme-background.jpg)'; 
-      case 'mint':
+    const currentTheme = theme === 'system' ? 'light' : theme; // Handle system theme
+    switch (currentTheme) {
+      case 'light':
         return 'linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url(/src/assets/mint-theme-background.jpg)';
-      case 'rose':
-        return 'linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url(/src/assets/rose-theme-background.jpg)';
       case 'dark':
         return 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(/src/assets/dark-theme-background.jpg)';
       default:

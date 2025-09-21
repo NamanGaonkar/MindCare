@@ -70,7 +70,10 @@ const Chat = () => {
       toast({ title: "Error loading session", description: error.message, variant: "destructive" });
       return;
     }
-    setMessages(data || []);
+    setMessages((data || []).map(msg => ({
+      ...msg,
+      sender_type: msg.sender_type as 'user' | 'ai'
+    })));
     setSessionId(sessionId);
     setShowHistory(false);
   };

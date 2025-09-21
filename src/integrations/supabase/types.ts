@@ -113,6 +113,7 @@ export type Database = {
           created_at: string
           crisis_indicators: Json | null
           id: string
+          last_message: string | null
           mood_rating: number | null
           session_summary: string | null
           title: string | null
@@ -123,6 +124,7 @@ export type Database = {
           created_at?: string
           crisis_indicators?: Json | null
           id?: string
+          last_message?: string | null
           mood_rating?: number | null
           session_summary?: string | null
           title?: string | null
@@ -133,6 +135,7 @@ export type Database = {
           created_at?: string
           crisis_indicators?: Json | null
           id?: string
+          last_message?: string | null
           mood_rating?: number | null
           session_summary?: string | null
           title?: string | null
@@ -204,6 +207,30 @@ export type Database = {
         }
         Relationships: []
       }
+      journal_entries: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mental_health_resources: {
         Row: {
           category: string
@@ -222,6 +249,7 @@ export type Database = {
           thumbnail_url: string | null
           title: string
           updated_at: string
+          url: string | null
           view_count: number | null
         }
         Insert: {
@@ -241,6 +269,7 @@ export type Database = {
           thumbnail_url?: string | null
           title: string
           updated_at?: string
+          url?: string | null
           view_count?: number | null
         }
         Update: {
@@ -260,7 +289,32 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
+          url?: string | null
           view_count?: number | null
+        }
+        Relationships: []
+      }
+      mood_entries: {
+        Row: {
+          created_at: string
+          id: string
+          mood_value: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mood_value: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mood_value?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -445,7 +499,43 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_booking_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          count: number
+          type: string
+        }[]
+      }
+      get_mood_distribution: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          count: number
+          mood_range: string
+        }[]
+      }
+      get_platform_health: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_session_trends: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          date: string
+          sessions: number
+        }[]
+      }
+      get_total_students: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_user_daily_activity: {
+        Args: { user_id_param: string }
+        Returns: {
+          date: string
+          posts: number
+          sessions: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

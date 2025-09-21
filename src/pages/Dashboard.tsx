@@ -77,7 +77,7 @@ const Dashboard = () => {
       <Navigation />
       <main className="container px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
-          <h1 className="text-3xl font-bold">Welcome, {user?.user_metadata?.full_name || 'User'}</h1>
+          <h1 className="text-3xl font-bold">Welcome, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}</h1>
           <p className="text-muted-foreground">Here is your mental wellness dashboard.</p>
         </motion.div>
 
