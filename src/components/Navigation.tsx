@@ -10,15 +10,15 @@ import AuthModal from "@/components/AuthModal";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
 
   const navItems = [
     { title: "Chat Support", href: "/chat", icon: MessageCircle },
     { title: "Book Appointment", href: "/booking", icon: Calendar },
     { title: "Resources", href: "/resources", icon: BookOpen },
     { title: "Community", href: "/peer-support", icon: Users },
-    { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { title: "Admin", href: "/admin", icon: Shield },
+    { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, requireAuth: true },
+    { title: "Admin", href: "/admin", icon: Shield, requireAuth: true, adminOnly: true },
   ];
 
   return (
@@ -39,21 +39,28 @@ const Navigation = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary",
-                location.pathname === item.href
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              <span>{item.title}</span>
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            // Hide admin-only items from regular users
+            if (item.adminOnly && !isAdmin) return null;
+            // Hide auth-required items from non-authenticated users
+            if (item.requireAuth && !user) return null;
+            
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={cn(
+                  "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary",
+                  location.pathname === item.href
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                <span>{item.title}</span>
+              </Link>
+            );
+          })}
           
           <div className="flex items-center space-x-4 ml-6">
             <ThemeToggle />
@@ -93,22 +100,29 @@ const Navigation = () => {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-b">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors",
-                  location.pathname === item.href
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                onClick={() => setIsOpen(false)}
-              >
-                <item.icon className="h-5 w-5" />
-                <span>{item.title}</span>
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              // Hide admin-only items from regular users
+              if (item.adminOnly && !isAdmin) return null;
+              // Hide auth-required items from non-authenticated users
+              if (item.requireAuth && !user) return null;
+              
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className={cn(
+                    "flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors",
+                    location.pathname === item.href
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  )}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.title}</span>
+                </Link>
+              );
+            })}
             
             <div className="border-t border-border/40 pt-4 mt-4">
               {user ? (
