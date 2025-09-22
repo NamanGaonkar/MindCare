@@ -7,7 +7,7 @@ import AuthModal from "@/components/AuthModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -168,7 +168,12 @@ const PeerSupport = () => {
                 <Button><Plus className="h-4 w-4 mr-2" />New Post</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-2xl">
-                <DialogHeader><DialogTitle>Share with the Community</DialogTitle></DialogHeader>
+                <DialogHeader>
+                  <DialogTitle>Share with the Community</DialogTitle>
+                  <DialogDescription>
+                    Create a new post to share your thoughts with fellow students anonymously and safely.
+                  </DialogDescription>
+                </DialogHeader>
                 <div className="space-y-4 py-4">
                   <Input placeholder="Post Title" value={newPost.title} onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))} />
                   <Textarea placeholder="Share your thoughts anonymously..." rows={6} value={newPost.content} onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))} />

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, LogIn, Mail, Lock, User, GraduationCap } from "lucide-react";
 
@@ -53,7 +53,7 @@ const AuthModal = ({ children, onAuthSuccess }: AuthModalProps) => {
       if (error) throw error;
 
       toast({
-        title: "Welcome to MindfulMate! 🎉",
+        title: "Welcome to MindCare! 🎉",
         description: "Please check your email to verify your account.",
       });
       
@@ -105,10 +105,13 @@ const AuthModal = ({ children, onAuthSuccess }: AuthModalProps) => {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[480px]" aria-describedby="auth-modal-description">
-        <div className="sr-only" id="auth-modal-description">
-          Authentication modal for signing in or creating an account
-        </div>
+      <DialogContent className="sm:max-w-[480px]">
+        <DialogHeader>
+          <DialogTitle>Welcome to MindCare</DialogTitle>
+          <DialogDescription>
+            Sign in to access your personal mental health dashboard and AI chat support.
+          </DialogDescription>
+        </DialogHeader>
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin" className="flex items-center gap-2">
@@ -171,7 +174,7 @@ const AuthModal = ({ children, onAuthSuccess }: AuthModalProps) => {
           <TabsContent value="signup">
             <Card>
               <CardHeader className="text-center">
-                <CardTitle className="text-xl">Join MindfulMate</CardTitle>
+                <CardTitle className="text-xl">Join MindCare</CardTitle>
                 <CardDescription>
                   Create your account to access mental health support
                 </CardDescription>

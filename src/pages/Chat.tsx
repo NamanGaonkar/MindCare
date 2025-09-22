@@ -87,9 +87,10 @@ const Chat = () => {
     setIsLoading(true);
     
     try {
-      const currentSessionId = sessionId || `session_${user.id}_${Date.now()}`;
+      const currentSessionId = sessionId; // Don't create invalid UUIDs
       if (!sessionId) {
-        setSessionId(currentSessionId);
+        // Let the backend create the session ID
+        setSessionId("new");
       }
 
       // Add user message to state immediately
@@ -104,12 +105,17 @@ const Chat = () => {
       const { data, error } = await supabase.functions.invoke('chat-with-gemini', {
         body: { 
           message: userMessageContent, 
-          sessionId: currentSessionId
+          sessionId: currentSessionId === "new" ? null : currentSessionId
         },
       });
 
       if (error) throw new Error(error.message);
       if (data.error) throw new Error(data.error);
+
+      // Update session ID if it was created by backend
+      if (data.sessionId && (!sessionId || sessionId === "new")) {
+        setSessionId(data.sessionId);
+      }
 
       // The AI message is now added via realtime subscription
 
@@ -132,7 +138,7 @@ const Chat = () => {
   useEffect(scrollToBottom, [messages]);
 
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId || sessionId === "new") return;
 
     const channel = supabase
       .channel(`chat-messages:${sessionId}`)
