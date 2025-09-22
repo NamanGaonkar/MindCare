@@ -31,7 +31,7 @@ const MoodTracker = () => {
         .eq('user_id', user.id)
         .gte('created_at', `${today}T00:00:00.000Z`)
         .lte('created_at', `${today}T23:59:59.999Z`)
-        .single();
+        .maybeSingle();
       
       if (data) {
         setSelectedMood(data.mood_value);
@@ -53,7 +53,7 @@ const MoodTracker = () => {
         .eq('user_id', user.id)
         .gte('created_at', `${today}T00:00:00.000Z`)
         .lte('created_at', `${today}T23:59:59.999Z`)
-        .single();
+        .maybeSingle();
 
     if (data) { // Update existing entry for today
         const { error: updateError } = await supabase
