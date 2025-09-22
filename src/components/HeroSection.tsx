@@ -31,20 +31,20 @@ const HeroSection = () => {
           Your mental wellness matters
         </div>
         <h1 className={`text-5xl md:text-7xl font-bold ${textColor}`}>
-          A Safe Space for <span className="text-primary">Student Wellbeing</span>
+          AI-Powered <span className="text-primary">Mental Health</span> Support
         </h1>
         <p className={`mt-6 text-lg md:text-xl max-w-3xl mx-auto ${textColor}`}>
-          Connect with support, access resources, and prioritize your mental health in a stigma-free environment designed just for students.
+          Get instant, confidential support from our advanced AI assistant trained specifically for student mental health and wellbeing.
         </p>
         <div className="mt-10 flex justify-center gap-4">
             <Button asChild size="lg" className="text-lg px-8 py-4">
                 <Link to="/chat">
-                    Start Chat Support <ArrowRight className="ml-2 h-5 w-5" />
+                    Start AI Chat <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className={`text-lg px-8 py-4 ${isLight ? 'border-primary text-primary hover:bg-primary/5' : 'text-white border-white hover:bg-white/10'}`}>
-                <Link to="/booking">
-                    <Book className="mr-2 h-5 w-5" /> Book Appointment
+                <Link to="/resources">
+                    <Book className="mr-2 h-5 w-5" /> Browse Resources
                 </Link>
             </Button>
         </div>
@@ -69,8 +69,8 @@ const HeroSection = () => {
             <div className="bg-primary/10 rounded-full p-5">
               <Book className="h-10 w-10 text-primary" />
             </div>
-            <h3 className="mt-5 text-2xl font-bold">Professional Care</h3>
-            <p className="mt-3">Licensed counselors ready to help.</p>
+            <h3 className="mt-5 text-2xl font-bold">AI-Powered Care</h3>
+            <p className="mt-3">Advanced AI trained for mental health support.</p>
           </div>
         </div>
       </div>

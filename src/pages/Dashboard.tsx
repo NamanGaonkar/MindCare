@@ -5,17 +5,22 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Award, Calendar, MessageSquare, Edit } from "lucide-react";
+import { Award, MessageSquare, Edit, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { SessionTypePieChart, DailyActivityBarChart } from "@/components/Charts";
+import { DailyActivityBarChart } from "@/components/Charts";
 import MoodTracker from "@/components/MoodTracker";
 import Journaling from "@/components/Journaling";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState({ bookings: 0, sessions: 0, posts: 0 });
-  const [chartData, setChartData] = useState({ pieChart: [], barChart: [] });
+  const [stats, setStats] = useState({ 
+    sessions: 0, 
+    messages: 0, 
+    posts: 0, 
+    totalChatTime: 0 
+  });
+  const [chartData, setChartData] = useState({ barChart: [], moodData: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,34 +29,34 @@ const Dashboard = () => {
       setLoading(true);
       try {
         // Fetch main stats
-        const { count: bookings } = await supabase.from('counseling_bookings').select('id', { count: 'exact' }).eq('user_id', user.id);
         const { count: sessions } = await supabase.from('chat_sessions').select('id', { count: 'exact' }).eq('user_id', user.id);
+        const { count: messages } = await supabase.from('chat_messages').select('id', { count: 'exact' }).eq('user_id', user.id).eq('sender_type', 'user');
         const { count: posts } = await supabase.from('peer_support_posts').select('id', { count: 'exact' }).eq('user_id', user.id);
-        setStats({ bookings: bookings || 0, sessions: sessions || 0, posts: posts || 0 });
+        
+        // Calculate approximate chat time (assume 2 mins per message)
+        const totalChatTime = (messages || 0) * 2;
+        
+        setStats({ 
+          sessions: sessions || 0, 
+          messages: messages || 0, 
+          posts: posts || 0, 
+          totalChatTime 
+        });
 
-        // Fetch data for pie chart
-        const { data: pieData, error: pieError } = await supabase
-          .from('counseling_bookings')
-          .select('booking_type')
-          .eq('user_id', user.id);
-        if (pieError) throw pieError;
-
-        const pieChartData = pieData.reduce((acc, booking) => {
-          const type = booking.booking_type.replace('_', ' ');
-          const existing = acc.find(item => item.label === type);
-          if (existing) {
-            existing.value++;
-          } else {
-            acc.push({ label: type, value: 1 });
-          }
-          return acc;
-        }, []);
-
-        // Fetch data for bar chart
+        // Fetch data for bar chart (daily activity)
         const { data: barData, error: barError } = await supabase.rpc('get_user_daily_activity', { user_id_param: user.id });
         if (barError) throw barError;
+
+        // Fetch mood data
+        const { data: moodData, error: moodError } = await supabase
+          .from('mood_entries')
+          .select('mood_value, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(30);
+        if (moodError) throw moodError;
         
-        setChartData({ pieChart: pieChartData, barChart: barData });
+        setChartData({ barChart: barData || [], moodData: moodData || [] });
 
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -66,10 +71,10 @@ const Dashboard = () => {
   }, [user]);
 
   const statCards = [
-    { title: "Appointments Booked", value: stats.bookings, icon: Calendar, color: "text-primary" },
-    { title: "AI Chats Started", value: stats.sessions, icon: MessageSquare, color: "text-sky-500" },
+    { title: "AI Chat Sessions", value: stats.sessions, icon: MessageSquare, color: "text-primary" },
+    { title: "Messages Sent", value: stats.messages, icon: Edit, color: "text-blue-500" },
     { title: "Community Posts", value: stats.posts, icon: Edit, color: "text-rose-500" },
-    { title: "Wellness Score", value: "78/100", icon: Award, color: "text-green-500" },
+    { title: "Chat Time (mins)", value: stats.totalChatTime, icon: Clock, color: "text-green-500" },
   ];
 
   return (
@@ -78,7 +83,7 @@ const Dashboard = () => {
       <main className="container px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
           <h1 className="text-3xl font-bold">Welcome, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}</h1>
-          <p className="text-muted-foreground">Here is your mental wellness dashboard.</p>
+          <p className="text-muted-foreground">Track your AI chat usage and mental wellness journey.</p>
         </motion.div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -105,20 +110,27 @@ const Dashboard = () => {
         <div className="grid gap-8 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Session Types</CardTitle>
-              <CardDescription>A breakdown of your booked sessions.</CardDescription>
+              <CardTitle>Daily Activity</CardTitle>
+              <CardDescription>Your recent AI chat sessions and community posts.</CardDescription>
             </CardHeader>
             <CardContent>
-              {chartData.pieChart.length > 0 ? <SessionTypePieChart data={chartData.pieChart} /> : <p>No session data yet.</p>}
+              {chartData.barChart.length > 0 ? <DailyActivityBarChart data={chartData.barChart} /> : <p>No activity data yet. Start your first chat!</p>}
             </CardContent>
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Daily Activity</CardTitle>
-              <CardDescription>Your recent sessions and posts.</CardDescription>
+              <CardTitle>Mood Trends</CardTitle>
+              <CardDescription>Track your mood over time.</CardDescription>
             </CardHeader>
             <CardContent>
-              {chartData.barChart.length > 0 ? <DailyActivityBarChart data={chartData.barChart} /> : <p>No activity data yet.</p>}
+              {chartData.moodData.length > 0 ? (
+                <div className="space-y-2">
+                  <p>Recent mood entries: {chartData.moodData.length}</p>
+                  <p>Latest mood: {chartData.moodData[0]?.mood_value}/10</p>
+                </div>
+              ) : (
+                <p>No mood data yet. Use the mood tracker to get started!</p>
+              )}
             </CardContent>
           </Card>
         </div>

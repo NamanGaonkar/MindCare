@@ -1,78 +1,74 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Book, MessageCircle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import BookingOptions from "@/components/BookingOptions";
+import { ArrowRight, Brain, Shield, MessageCircle } from "lucide-react";
+import FeatureCards from "@/components/FeatureCards";
 
 const LandingPage = () => {
   return (
-    <div 
-      className="flex flex-col min-h-screen bg-cover bg-center text-foreground"
-      style={{ backgroundImage: "url('/src/assets/mint-wave.png')" }}
-    >
-      <div className="flex-1 bg-background/50 backdrop-blur-sm">
-        <main className="flex-1">
-          <section
-            className="relative py-20"
-          >
-            <div className="relative container mx-auto px-4 text-center">
-              <div className="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                Your mental wellness matters
-              </div>
-              <h1 className="text-5xl md:text-7xl font-bold">
-                A Safe Space for <span className="text-primary">Student Wellbeing</span>
-              </h1>
-              <p className="mt-6 text-lg md:text-xl max-w-3xl mx-auto">
-                Connect with support, access resources, and prioritize your mental health in a stigma-free environment designed just for students.
-              </p>
-              <div className="mt-10 flex justify-center gap-4">
-                <Button size="lg" asChild className="text-lg px-8 py-4">
-                  <Link to="/chat">
-                    Start Chat Support <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild className="text-lg px-8 py-4 border-primary text-primary hover:bg-primary/5">
-                   <Link to="/booking">
-                    <Book className="mr-2 h-5 w-5" /> Book Appointment
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </section>
-          
-          <section className="py-20">
-            <div className="container mx-auto px-4">
-              <BookingOptions />
-            </div>
-          </section>
+    <div className="min-h-screen bg-background">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-primary/5 to-secondary/5 border-none">
+        <div className="container px-4 py-16 text-center">
+          <div className="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
+            AI-Powered Mental Wellness
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            Your Personal AI <span className="text-primary">Mental Health</span> Assistant
+          </h1>
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Get instant, confidential mental health support from our AI assistant trained specifically for students. Available 24/7, completely private.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg" className="text-lg px-8 py-4">
+              <Link to="/chat">
+                Start AI Chat <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="text-lg px-8 py-4">
+              <Link to="/resources">
+                Explore Resources <Brain className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
 
-          <section className="py-20">
-            <div className="container mx-auto px-4">
-              <div className="grid md:grid-cols-3 gap-12 text-center">
-                  <div className="flex flex-col items-center transparent-card rounded-lg p-8">
-                    <div className="bg-primary/10 rounded-full p-5">
-                      <ShieldCheck className="h-10 w-10 text-primary" />
-                    </div>
-                    <h3 className="mt-5 text-2xl font-bold">Confidential</h3>
-                    <p className="mt-3 text-muted-foreground">Your privacy is our priority.</p>
-                  </div>
-                  <div className="flex flex-col items-center transparent-card rounded-lg p-8">
-                    <div className="bg-primary/10 rounded-full p-5">
-                      <MessageCircle className="h-10 w-10 text-primary" />
-                    </div>
-                    <h3 className="mt-5 text-2xl font-bold">24/7 Support</h3>
-                    <p className="mt-3 text-muted-foreground">Available whenever you need us.</p>
-                  </div>
-                  <div className="flex flex-col items-center transparent-card rounded-lg p-8">
-                    <div className="bg-primary/10 rounded-full p-5">
-                      <Book className="h-10 w-10 text-primary" />
-                    </div>
-                    <h3 className="mt-5 text-2xl font-bold">Professional Care</h3>
-                    <p className="mt-3 text-muted-foreground">Licensed counselors ready to help.</p>
-                  </div>
+      {/* AI Features Section */}
+      <FeatureCards />
+
+      {/* Trust & Safety Section */}
+      <div className="py-16 bg-muted/30">
+        <div className="container px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Why Students Trust Our AI</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Built with student privacy and mental health expertise at its core.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="bg-primary/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Shield className="h-8 w-8 text-primary" />
               </div>
+              <h3 className="text-xl font-semibold mb-2">100% Confidential</h3>
+              <p className="text-muted-foreground">Your conversations are completely private and never shared.</p>
             </div>
-          </section>
-        </main>
+            <div className="text-center">
+              <div className="bg-primary/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <MessageCircle className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">24/7 Availability</h3>
+              <p className="text-muted-foreground">Get support whenever you need it, day or night.</p>
+            </div>
+            <div className="text-center">
+              <div className="bg-primary/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Brain className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Student-Focused</h3>
+              <p className="text-muted-foreground">Specifically trained on student mental health challenges.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

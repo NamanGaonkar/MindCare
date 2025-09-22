@@ -13,8 +13,7 @@ const Navigation = () => {
   const { user, signOut, isAdmin } = useAuth();
 
   const navItems = [
-    { title: "Chat Support", href: "/chat", icon: MessageCircle },
-    { title: "Book Appointment", href: "/booking", icon: Calendar },
+    { title: "AI Chat", href: "/chat", icon: MessageCircle },
     { title: "Resources", href: "/resources", icon: BookOpen },
     { title: "Community", href: "/peer-support", icon: Users },
     { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, requireAuth: true },

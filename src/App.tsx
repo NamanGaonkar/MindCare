@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Chat from "./pages/Chat";
-import Booking from "./pages/Booking";
 import Resources from "./pages/Resources";
 import PeerSupport from "./pages/PeerSupport";
 import PostDetails from "./pages/PostDetails";
@@ -29,7 +28,6 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/home" element={<Home />} />
             <Route path="/chat" element={<Chat />} />
-            <Route path="/booking" element={<Booking />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/peer-support" element={<PeerSupport />} />
             <Route path="/peer-support/:id" element={<PostDetails />} />
