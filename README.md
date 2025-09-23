@@ -16,7 +16,7 @@ MindCareAI provides a safe space where students can **interact with each other**
 
 ##  Landing Page Preview
 
-![MindCareAI Landing Page](https://via.placeholder.com/1200x600.png?text=MindCareAI+Landing+Page+Preview)
+![MindCareAI Landing Page](landing-page.png)
 
 ---
 
