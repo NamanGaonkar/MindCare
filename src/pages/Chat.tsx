@@ -118,7 +118,16 @@ const Chat = () => {
         setSessionId(data.sessionId);
       }
 
-      // The AI message is now added via realtime subscription
+      // Add AI response immediately as fallback (in case realtime doesn't work)
+      if (data.response) {
+        const aiMessage: ChatMessage = {
+          id: `ai_${Date.now()}`,
+          message: data.response,
+          sender_type: 'ai',
+          created_at: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      }
 
     } catch (error: any) {
       toast({ title: "Message Failed", description: error.message, variant: "destructive" });
@@ -147,7 +156,17 @@ const Chat = () => {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${sessionId}` },
         (payload) => {
-          setMessages(prev => [...prev, payload.new as ChatMessage]);
+          const newMessage = payload.new as ChatMessage;
+          // Prevent duplicate messages by checking if message already exists
+          setMessages(prev => {
+            const exists = prev.some(msg => 
+              msg.message === newMessage.message && 
+              msg.sender_type === newMessage.sender_type &&
+              Math.abs(new Date(msg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 5000
+            );
+            if (exists) return prev;
+            return [...prev, newMessage];
+          });
         }
       )
       .subscribe();
