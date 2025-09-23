@@ -53,7 +53,7 @@ const AuthModal = ({ children, onAuthSuccess }: AuthModalProps) => {
       if (error) throw error;
 
       toast({
-        title: "Welcome to MindCare! 🎉",
+        title: "Welcome to MindCareAi! 🎉",
         description: "Please check your email to verify your account.",
       });
       
@@ -107,7 +107,7 @@ const AuthModal = ({ children, onAuthSuccess }: AuthModalProps) => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>Welcome to MindCare</DialogTitle>
+          <DialogTitle>Welcome to MindCareAi</DialogTitle>
           <DialogDescription>
             Sign in to access your personal mental health dashboard and AI chat support.
           </DialogDescription>
@@ -174,9 +174,9 @@ const AuthModal = ({ children, onAuthSuccess }: AuthModalProps) => {
           <TabsContent value="signup">
             <Card>
               <CardHeader className="text-center">
-                <CardTitle className="text-xl">Join MindCare</CardTitle>
+                <CardTitle className="text-xl">Join MindCareAi</CardTitle>
                 <CardDescription>
-                  Create your account to access mental health support
+                  Create your account to access AI-powered mental health support
                 </CardDescription>
               </CardHeader>
               <CardContent>

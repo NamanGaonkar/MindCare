@@ -32,7 +32,7 @@ const Navigation = () => {
             </svg>
           </div>
           <span className="text-xl font-bold text-foreground">
-            MindCare
+            MindCareAi
           </span>
         </Link>
 
