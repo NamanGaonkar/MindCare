@@ -1,21 +1,45 @@
-#  MindfulMate
+# MindCareAI
 
-MindfulMate is a digital mental health and psychological support system for students in higher education.  
-It helps students access stigma-free support, self-help resources, and professional guidance while giving institutions insights into student wellbeing.
+> An AI-powered platform designed to support the **mental health of college students**.  
+MindCareAI provides a safe space where students can **interact with each other** and also get **personalized AI guidance** for their mental well-being.  
 
 ---
 
 ##  Features
-- AI-guided chatbot (Gemini API) for instant support  
-- Confidential booking with counselors/helplines  
-- Resource hub with videos & wellness guides  
-- Peer support forum (student-to-student help)  
-- Admin dashboard with anonymous analytics  
+-  **Peer Interaction** – Connect and chat with fellow college students.  
+-  **AI Mental Health Assistant** – Ask AI for guidance, coping tips, and motivation.  
+-  **Journaling & Reflections** – Maintain private notes to track emotions.  
+-  **Privacy First** – Your conversations are secure and confidential.  
+-  **Student-Centric** – Built specially for the challenges of college life.  
+
+---
+
+##  Landing Page Preview
+
+![MindCareAI Landing Page](https://via.placeholder.com/1200x600.png?text=MindCareAI+Landing+Page+Preview)
 
 ---
 
 ##  Tech Stack
-- Frontend: React + TailwindCSS  
-- Backend & Auth: Supabase  
-- AI: Google Gemini API  
-- Deployment: Vercel
+- **Frontend**: React / Next.js  
+- **Backend**: Node.js / Express  
+- **Database**: MongoDB / PostgreSQL  
+- **AI Integration**: OpenAI / Gemini APIs  
+- **Auth**: JWT / OAuth2  
+
+---
+
+##  Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/MindCareAI.git
+
+# Navigate to the project
+cd MindCareAI
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
