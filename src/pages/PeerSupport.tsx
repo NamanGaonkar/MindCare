@@ -42,10 +42,7 @@ const PeerSupport = () => {
           content,
           category,
           is_anonymous,
-          user_id,
-          reactions:peer_support_reactions(user_id),
-          comments:peer_support_comments(count),
-          author:profiles(full_name)
+          user_id
         `)
         .order('created_at', { ascending: false });
 
@@ -53,10 +50,37 @@ const PeerSupport = () => {
         query = query.eq('category', selectedCategory);
       }
 
-      const { data, error } = await query;
+      const { data: postsData, error } = await query;
 
       if (error) throw error;
-      setPosts(data || []);
+      
+      // Fetch reactions and comments separately
+      const postIds = postsData?.map(post => post.id) || [];
+      
+      const { data: reactionsData } = await supabase
+        .from('peer_support_reactions')
+        .select('post_id, user_id, reaction_type')
+        .in('post_id', postIds);
+        
+      const { data: commentsData } = await supabase
+        .from('peer_support_comments')
+        .select('post_id')
+        .in('post_id', postIds);
+        
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', postsData?.map(post => post.user_id) || []);
+      
+      // Combine the data
+      const postsWithCounts = postsData?.map(post => ({
+        ...post,
+        reactions: reactionsData?.filter(r => r.post_id === post.id) || [],
+        comments: [{ count: commentsData?.filter(c => c.post_id === post.id).length || 0 }],
+        author: post.is_anonymous ? null : profilesData?.find(p => p.user_id === post.user_id)
+      })) || [];
+      
+      setPosts(postsWithCounts);
     } catch (error) {
       toast({ title: "Error Loading Posts", description: error.message, variant: "destructive" });
     } finally {

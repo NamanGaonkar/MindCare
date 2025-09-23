@@ -105,7 +105,8 @@ const Chat = () => {
       const { data, error } = await supabase.functions.invoke('chat-with-gemini', {
         body: { 
           message: userMessageContent, 
-          sessionId: currentSessionId === "new" ? null : currentSessionId
+          sessionId: currentSessionId === "new" ? null : currentSessionId,
+          moodRating: 5 // Default mood rating since we removed the mood tracker from chat
         },
       });
 
