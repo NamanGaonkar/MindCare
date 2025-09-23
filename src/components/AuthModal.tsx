@@ -41,7 +41,7 @@ const AuthModal = ({ children, onAuthSuccess }: AuthModalProps) => {
         email: signUpData.email,
         password: signUpData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/?verified=true`,
           data: {
             full_name: signUpData.fullName,
             student_id: signUpData.studentId,

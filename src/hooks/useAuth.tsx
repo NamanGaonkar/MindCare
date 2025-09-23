@@ -59,8 +59,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         setLoading(false);
 
+        // Handle email verification success
         if (event === "SIGNED_IN") {
+          // Check if user came from email verification
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('verified') === 'true') {
+            // Clear the URL parameter
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
           navigate("/dashboard");
+        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+          // Handle email verification completion
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('verified') === 'true') {
+            // Clear the URL parameter
+            window.history.replaceState({}, document.title, window.location.pathname);
+            navigate("/dashboard");
+          }
         } else if (event === 'USER_UPDATED') {
           navigate("/");
         }
