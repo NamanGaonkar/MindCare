@@ -223,7 +223,7 @@ const Chat = () => {
                       </div>
                     </div>
                 </CardHeader>
-                <CardContent className="flex-1 p-0">
+                <CardContent className="flex-1 p-0 min-h-0">
                     <ScrollArea className="h-full p-6">
                         <div className="space-y-6">
                             {messages.length === 0 && (
