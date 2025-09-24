@@ -21,11 +21,11 @@ MindCareAI provides a safe space where students can **interact with each other**
 ---
 
 ##  Tech Stack
-- **Frontend**: React / Next.js  
-- **Backend**: Node.js / Express  
-- **Database**: MongoDB / PostgreSQL  
-- **AI Integration**: OpenAI / Gemini APIs  
-- **Auth**: JWT / OAuth2  
+- **Frontend**: React, Vite, Shadcn UI, Tailwind CSS
+- **Backend as a Service (BaaS)**: Supabase
+- **Database**: Supabase (PostgreSQL)
+- **AI Integration**: Google Gemini (via Supabase Functions)
+- **Authentication**: Supabase Auth
 
 ---
 
@@ -43,3 +43,4 @@ npm install
 
 # Start development server
 npm run dev
+```
