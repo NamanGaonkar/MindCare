@@ -34,12 +34,10 @@ const Chat = () => {
   const [showHistory, setShowHistory] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Voice-to-text and text-to-speech state
   const [isRecording, setIsRecording] = useState(false);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
-  const recognitionRef = useRef<any>(null); // SpeechRecognition instance
+  const recognitionRef = useRef<any>(null);
 
-  // --- Speech Recognition Setup ---
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -67,13 +65,11 @@ const Chat = () => {
       toast({ title: "Speech Recognition Not Supported", description: "Your browser does not support speech recognition.", variant: "destructive" });
     }
 
-    // Cleanup speech synthesis on component unmount
     return () => {
       window.speechSynthesis.cancel();
     };
   }, [toast]);
 
-  // --- Voice Handlers ---
   const toggleRecording = () => {
     if (isRecording) {
       recognitionRef.current?.stop();
@@ -86,13 +82,12 @@ const Chat = () => {
 
   const speak = (text: string) => {
     if (isVoiceEnabled && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Cancel any previous speech
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       window.speechSynthesis.speak(utterance);
     }
   };
 
-  // --- Core Chat Functions ---
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
@@ -195,11 +190,24 @@ const Chat = () => {
     toast({ title: "Current chat cleared." });
   };
 
+  const deleteSession = async (sessionIdToDelete: string) => {
+    const { error } = await supabase.from('chat_sessions').delete().eq('id', sessionIdToDelete);
+
+    if (error) {
+        toast({ title: "Error deleting session", description: error.message, variant: "destructive" });
+    } else {
+        toast({ title: "Session deleted" });
+        setChatHistory(prev => prev.filter(s => s.id !== sessionIdToDelete));
+        if (sessionId === sessionIdToDelete) {
+            clearCurrentChat();
+        }
+    }
+  }
+
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
 
-  // Supabase real-time subscription
   useEffect(() => {
     if (!sessionId || sessionId === "new") return;
     const channel = supabase
@@ -210,7 +218,6 @@ const Chat = () => {
           setMessages(prev => {
             const exists = prev.some(msg => msg.id === newMessage.id);
             if (exists) return prev;
-            // Only speak AI messages received from backend
             if (newMessage.sender_type === 'ai') speak(newMessage.message);
             return [...prev, newMessage];
           });
@@ -245,9 +252,18 @@ const Chat = () => {
           <Card className={`w-1/3 transition-all duration-300 ${showHistory ? 'block' : 'hidden'} md:flex md:flex-col`}>
             <CardHeader><CardTitle>Chat History</CardTitle></CardHeader>
             <ScrollArea className="h-full p-4">{chatHistory.map(session => (
-                <div key={session.id} className="mb-2 cursor-pointer p-2 rounded-lg hover:bg-muted" onClick={() => loadSessionMessages(session.id)}>
-                  <p className="font-semibold truncate">{session.title || 'New Session'}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(session.created_at).toLocaleString()}</p>
+                <div key={session.id} className="group relative mb-2 rounded-lg hover:bg-muted" >
+                  <div className="p-2 cursor-pointer" onClick={() => loadSessionMessages(session.id)}>
+                    <p className="font-semibold truncate">{session.title || 'New Session'}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(session.created_at).toLocaleString()}</p>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute top-1/2 right-2 -translate-y-1/2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }}>
+                      <Trash2 className="h-4 w-4 text-destructive"/>
+                  </Button>
                 </div>))}
             </ScrollArea>
           </Card>
@@ -259,7 +275,7 @@ const Chat = () => {
                       <CardTitle className="flex items-center gap-2"><Brain className="text-primary" />MindCareAi Assistant</CardTitle>
                       <div className="flex items-center gap-2">
                         <Button variant="outline" size="icon" onClick={() => setIsVoiceEnabled(!isVoiceEnabled)}>
-                          {isVoiceEnabled ? <Volume2 className="h-5 w-5"/> : <VolumeX className="h-5 w-5"/>}
+                          {isVoiceEnabled ? <Volume2 className="h-5 w-5"/> : <VolumeX className.reference h-5 w-5"/>}
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => setShowHistory(!showHistory)} className="md:hidden"><MessageSquare className="h-4 w-4"/></Button>
                         <Button variant="outline" size="sm" onClick={clearCurrentChat}><Trash2 className="h-4 w-4 mr-2"/>New Chat</Button>
