@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Loader2, Brain, User, Sparkles, Trash2, MessageSquare } from "lucide-react";
+import { Send, Loader2, Brain, User, Sparkles, Trash2, MessageSquare, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 
 interface ChatMessage {
   id: string;
@@ -34,6 +34,65 @@ const Chat = () => {
   const [showHistory, setShowHistory] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // Voice-to-text and text-to-speech state
+  const [isRecording, setIsRecording] = useState(false);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
+  const recognitionRef = useRef<any>(null); // SpeechRecognition instance
+
+  // --- Speech Recognition Setup ---
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map((result) => result.transcript)
+          .join('');
+        setCurrentMessage(transcript);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        toast({ title: "Speech Recognition Error", description: event.error, variant: "destructive" });
+        setIsRecording(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsRecording(false);
+      };
+    } else {
+      toast({ title: "Speech Recognition Not Supported", description: "Your browser does not support speech recognition.", variant: "destructive" });
+    }
+
+    // Cleanup speech synthesis on component unmount
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, [toast]);
+
+  // --- Voice Handlers ---
+  const toggleRecording = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+    } else {
+      recognitionRef.current?.start();
+      setIsRecording(true);
+    }
+  };
+
+  const speak = (text: string) => {
+    if (isVoiceEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // Cancel any previous speech
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  // --- Core Chat Functions ---
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
@@ -62,6 +121,7 @@ const Chat = () => {
   };
 
   const loadSessionMessages = async (sessionId: string) => {
+    window.speechSynthesis.cancel();
     const { data, error } = await supabase
       .from('chat_messages')
       .select('id, message, sender_type, created_at')
@@ -72,16 +132,17 @@ const Chat = () => {
       toast({ title: "Error loading session", description: error.message, variant: "destructive" });
       return;
     }
-    setMessages((data || []).map(msg => ({
-      ...msg,
-      sender_type: msg.sender_type as 'user' | 'ai'
-    })));
+    setMessages((data || []).map(msg => ({ ...msg, sender_type: msg.sender_type as 'user' | 'ai' })));
     setSessionId(sessionId);
     setShowHistory(false);
   };
 
   const sendMessage = async () => {
     if (!currentMessage.trim() || !user) return;
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+    }
 
     const userMessageContent = currentMessage.trim();
     setCurrentMessage("");
@@ -89,9 +150,7 @@ const Chat = () => {
 
     try {
       const currentSessionId = sessionId;
-      if (!sessionId) {
-        setSessionId("new");
-      }
+      if (!sessionId) setSessionId("new");
 
       const userMessage: ChatMessage = {
         id: `user_${Date.now()}`,
@@ -102,19 +161,12 @@ const Chat = () => {
       setMessages(prev => [...prev, userMessage]);
 
       const { data, error } = await supabase.functions.invoke('chat-with-gemini', {
-        body: { 
-          message: userMessageContent, 
-          sessionId: currentSessionId === "new" ? null : currentSessionId,
-          moodRating: 5
-        },
+        body: { message: userMessageContent, sessionId: currentSessionId === "new" ? null : currentSessionId, moodRating: 5 },
       });
 
       if (error) throw new Error(error.message);
       if (data.error) throw new Error(data.error);
-
-      if (data.sessionId && (!sessionId || sessionId === "new")) {
-        setSessionId(data.sessionId);
-      }
+      if (data.sessionId && (!sessionId || sessionId === "new")) setSessionId(data.sessionId);
 
       if (data.response) {
         const aiMessage: ChatMessage = {
@@ -124,11 +176,12 @@ const Chat = () => {
           created_at: new Date().toISOString(),
         };
         setMessages(prev => [...prev, aiMessage]);
+        speak(data.response);
       }
 
     } catch (error: any) {
       toast({ title: "Message Failed", description: error.message, variant: "destructive" });
-      setMessages(prev => prev.slice(0, -1)); 
+      setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
       loadChatHistory();
@@ -138,6 +191,7 @@ const Chat = () => {
   const clearCurrentChat = () => {
     setMessages([]);
     setSessionId(null);
+    window.speechSynthesis.cancel();
     toast({ title: "Current chat cleared." });
   };
 
@@ -145,38 +199,31 @@ const Chat = () => {
     scrollToBottom();
   }, [messages, isLoading]);
 
+  // Supabase real-time subscription
   useEffect(() => {
     if (!sessionId || sessionId === "new") return;
-
     const channel = supabase
       .channel(`chat-messages:${sessionId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${sessionId}` },
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${sessionId}` },
         (payload) => {
           const newMessage = payload.new as ChatMessage;
           setMessages(prev => {
-            const exists = prev.some(msg => 
-              msg.message === newMessage.message && 
-              msg.sender_type === newMessage.sender_type &&
-              Math.abs(new Date(msg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 5000
-            );
+            const exists = prev.some(msg => msg.id === newMessage.id);
             if (exists) return prev;
+            // Only speak AI messages received from backend
+            if (newMessage.sender_type === 'ai') speak(newMessage.message);
             return [...prev, newMessage];
           });
         }
-      )
-      .subscribe();
+      ).subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [sessionId]);
 
   if (authLoading) {
     return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
-
+  
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
@@ -196,16 +243,12 @@ const Chat = () => {
       <div className="flex-1 flex flex-col min-h-0">
         <div className="h-full flex max-w-7xl mx-auto py-4 gap-4 w-full">
           <Card className={`w-1/3 transition-all duration-300 ${showHistory ? 'block' : 'hidden'} md:flex md:flex-col`}>
-            <CardHeader>
-              <CardTitle>Chat History</CardTitle>
-            </CardHeader>
-            <ScrollArea className="h-full p-4">
-              {chatHistory.map(session => (
+            <CardHeader><CardTitle>Chat History</CardTitle></CardHeader>
+            <ScrollArea className="h-full p-4">{chatHistory.map(session => (
                 <div key={session.id} className="mb-2 cursor-pointer p-2 rounded-lg hover:bg-muted" onClick={() => loadSessionMessages(session.id)}>
                   <p className="font-semibold truncate">{session.title || 'New Session'}</p>
                   <p className="text-xs text-muted-foreground">{new Date(session.created_at).toLocaleString()}</p>
-                </div>
-              ))}
+                </div>))}
             </ScrollArea>
           </Card>
 
@@ -215,17 +258,15 @@ const Chat = () => {
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2"><Brain className="text-primary" />MindCareAi Assistant</CardTitle>
                       <div className="flex items-center gap-2">
+                        <Button variant="outline" size="icon" onClick={() => setIsVoiceEnabled(!isVoiceEnabled)}>
+                          {isVoiceEnabled ? <Volume2 className="h-5 w-5"/> : <VolumeX className="h-5 w-5"/>}
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => setShowHistory(!showHistory)} className="md:hidden"><MessageSquare className="h-4 w-4"/></Button>
                         <Button variant="outline" size="sm" onClick={clearCurrentChat}><Trash2 className="h-4 w-4 mr-2"/>New Chat</Button>
                       </div>
                     </div>
                 </CardHeader>
                 <CardContent ref={scrollAreaRef} className="flex-1 p-6 space-y-6 overflow-y-auto">
-                  {messages.length === 0 && (
-                      <div className="text-center text-muted-foreground pt-16">
-                          <p>No messages yet. Send a message to start.</p>
-                      </div>
-                  )}
                   {messages.map((msg) => (
                       <div key={msg.id} className={`flex gap-3 ${msg.sender_type === 'user' ? 'justify-end' : ''}`}>
                           {msg.sender_type === 'ai' && <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0"><Sparkles className="h-5 w-5 text-primary" /></div>}
@@ -238,26 +279,28 @@ const Chat = () => {
                   {isLoading && (
                       <div className="flex gap-3">
                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center"><Sparkles className="h-5 w-5 text-primary" /></div>
-                          <div className="bg-muted rounded-xl px-4 py-3 flex items-center gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              <span className="text-sm text-muted-foreground">AI is thinking...</span>
-                          </div>
+                          <div className="bg-muted rounded-xl px-4 py-3 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /><span className="text-sm text-muted-foreground">AI is thinking...</span></div>
                       </div>
                   )}
                 </CardContent>
                 <div className="border-t p-4 bg-background/95">
-                    <div className="relative">
+                    <div className="relative flex items-center">
                         <Input 
-                            placeholder="Type your message..." 
-                            className="pr-12" 
+                            placeholder={isRecording ? "Listening..." : "Type your message..."} 
+                            className="pr-20" 
                             value={currentMessage}
                             onChange={(e) => setCurrentMessage(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                             disabled={isLoading}
                         />
-                        <Button size="icon" className="absolute right-2 top-1/2 -translate-y-1/2" onClick={sendMessage} disabled={isLoading || !currentMessage.trim()}>
-                            <Send className="h-4 w-4" />
-                        </Button>
+                        <div className="absolute right-2 flex gap-1">
+                          <Button size="icon" variant={isRecording ? "destructive" : "ghost"} onClick={toggleRecording} disabled={isLoading}>
+                              {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={sendMessage} disabled={isLoading || !currentMessage.trim()}>
+                              <Send className="h-5 w-5" />
+                          </Button>
+                        </div>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2 text-center">Your conversation is private and secure. If you are in a crisis, please call a helpline. In India, you can call 112 (emergency), 108 (medical), or 104 (health advice).</p>
                 </div>
