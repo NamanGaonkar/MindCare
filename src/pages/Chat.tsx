@@ -32,10 +32,12 @@ const Chat = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
   const [showHistory, setShowHistory] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -78,22 +80,19 @@ const Chat = () => {
     setShowHistory(false);
   };
 
-
   const sendMessage = async () => {
     if (!currentMessage.trim() || !user) return;
 
     const userMessageContent = currentMessage.trim();
     setCurrentMessage("");
     setIsLoading(true);
-    
+
     try {
-      const currentSessionId = sessionId; // Don't create invalid UUIDs
+      const currentSessionId = sessionId;
       if (!sessionId) {
-        // Let the backend create the session ID
         setSessionId("new");
       }
 
-      // Add user message to state immediately
       const userMessage: ChatMessage = {
         id: `user_${Date.now()}`,
         message: userMessageContent,
@@ -106,19 +105,17 @@ const Chat = () => {
         body: { 
           message: userMessageContent, 
           sessionId: currentSessionId === "new" ? null : currentSessionId,
-          moodRating: 5 // Default mood rating since we removed the mood tracker from chat
+          moodRating: 5
         },
       });
 
       if (error) throw new Error(error.message);
       if (data.error) throw new Error(data.error);
 
-      // Update session ID if it was created by backend
       if (data.sessionId && (!sessionId || sessionId === "new")) {
         setSessionId(data.sessionId);
       }
 
-      // Add AI response immediately as fallback (in case realtime doesn't work)
       if (data.response) {
         const aiMessage: ChatMessage = {
           id: `ai_${Date.now()}`,
@@ -131,11 +128,10 @@ const Chat = () => {
 
     } catch (error: any) {
       toast({ title: "Message Failed", description: error.message, variant: "destructive" });
-      // remove the user message if the call fails
       setMessages(prev => prev.slice(0, -1)); 
     } finally {
       setIsLoading(false);
-      loadChatHistory(); // Refresh history to show new/updated session
+      loadChatHistory();
     }
   };
 
@@ -145,7 +141,9 @@ const Chat = () => {
     toast({ title: "Current chat cleared." });
   };
 
-  useEffect(scrollToBottom, [messages]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
 
   useEffect(() => {
     if (!sessionId || sessionId === "new") return;
@@ -157,7 +155,6 @@ const Chat = () => {
         { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${sessionId}` },
         (payload) => {
           const newMessage = payload.new as ChatMessage;
-          // Prevent duplicate messages by checking if message already exists
           setMessages(prev => {
             const exists = prev.some(msg => 
               msg.message === newMessage.message && 
@@ -196,13 +193,13 @@ const Chat = () => {
   return (
     <div className="flex h-screen flex-col bg-muted/20">
       <Navigation />
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full flex max-w-7xl mx-auto py-4 gap-4">
-          <Card className={`w-1/3 transition-all duration-300 ${showHistory ? 'block' : 'hidden'} md:block`}>
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="h-full flex max-w-7xl mx-auto py-4 gap-4 w-full">
+          <Card className={`w-1/3 transition-all duration-300 ${showHistory ? 'block' : 'hidden'} md:flex md:flex-col`}>
             <CardHeader>
               <CardTitle>Chat History</CardTitle>
             </CardHeader>
-            <ScrollArea className="h-[calc(100%-4rem)] p-4">
+            <ScrollArea className="h-full p-4">
               {chatHistory.map(session => (
                 <div key={session.id} className="mb-2 cursor-pointer p-2 rounded-lg hover:bg-muted" onClick={() => loadSessionMessages(session.id)}>
                   <p className="font-semibold truncate">{session.title || 'New Session'}</p>
@@ -223,35 +220,30 @@ const Chat = () => {
                       </div>
                     </div>
                 </CardHeader>
-                <CardContent className="flex-1 p-0 min-h-0">
-                    <ScrollArea className="h-full p-6">
-                        <div className="space-y-6">
-                            {messages.length === 0 && (
-                                <div className="text-center text-muted-foreground pt-16">
-                                    <p>No messages yet. Send a message to start.</p>
-                                </div>
-                            )}
-                            {messages.map((msg) => (
-                                <div key={msg.id} className={`flex gap-3 ${msg.sender_type === 'user' ? 'justify-end' : ''}`}>
-                                    {msg.sender_type === 'ai' && <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center"><Sparkles className="h-5 w-5 text-primary" /></div>}
-                                    <div className={`max-w-[75%] rounded-xl px-4 py-2 ${msg.sender_type === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                        <p className="whitespace-pre-wrap text-sm">{msg.message}</p>
-                                    </div>
-                                    {msg.sender_type === 'user' && <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center"><User className="h-5 w-5 text-secondary-foreground" /></div>}
-                                </div>
-                            ))}
-                            {isLoading && (
-                                <div className="flex gap-3">
-                                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center"><Sparkles className="h-5 w-5 text-primary" /></div>
-                                    <div className="bg-muted rounded-xl px-4 py-3 flex items-center gap-2">
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                        <span className="text-sm text-muted-foreground">AI is thinking...</span>
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={messagesEndRef} />
-                        </div>
-                    </ScrollArea>
+                <CardContent ref={scrollAreaRef} className="flex-1 p-6 space-y-6 overflow-y-auto">
+                  {messages.length === 0 && (
+                      <div className="text-center text-muted-foreground pt-16">
+                          <p>No messages yet. Send a message to start.</p>
+                      </div>
+                  )}
+                  {messages.map((msg) => (
+                      <div key={msg.id} className={`flex gap-3 ${msg.sender_type === 'user' ? 'justify-end' : ''}`}>
+                          {msg.sender_type === 'ai' && <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0"><Sparkles className="h-5 w-5 text-primary" /></div>}
+                          <div className={`max-w-[75%] rounded-xl px-4 py-2 ${msg.sender_type === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                              <p className="whitespace-pre-wrap text-sm">{msg.message}</p>
+                          </div>
+                          {msg.sender_type === 'user' && <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0"><User className="h-5 w-5 text-secondary-foreground" /></div>}
+                      </div>
+                  ))}
+                  {isLoading && (
+                      <div className="flex gap-3">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center"><Sparkles className="h-5 w-5 text-primary" /></div>
+                          <div className="bg-muted rounded-xl px-4 py-3 flex items-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <span className="text-sm text-muted-foreground">AI is thinking...</span>
+                          </div>
+                      </div>
+                  )}
                 </CardContent>
                 <div className="border-t p-4 bg-background/95">
                     <div className="relative">
@@ -270,7 +262,6 @@ const Chat = () => {
                     <p className="text-xs text-muted-foreground mt-2 text-center">Your conversation is private and secure. If you are in a crisis, please call a helpline. In India, you can call 112 (emergency), 108 (medical), or 104 (health advice).</p>
                 </div>
             </Card>
-        </div>
         </div>
       </div>
     </div>
