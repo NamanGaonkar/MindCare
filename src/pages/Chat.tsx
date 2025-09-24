@@ -37,6 +37,7 @@ const Chat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const recognitionRef = useRef<any>(null);
+  const speechEndTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -46,6 +47,9 @@ const Chat = () => {
       recognitionRef.current.interimResults = true;
 
       recognitionRef.current.onresult = (event: any) => {
+        if (speechEndTimeoutRef.current) {
+          clearTimeout(speechEndTimeoutRef.current);
+        }
         const transcript = Array.from(event.results)
           .map((result: any) => result[0])
           .map((result) => result.transcript)
@@ -60,21 +64,37 @@ const Chat = () => {
 
       recognitionRef.current.onend = () => {
         setIsRecording(false);
+        // Automatically send the message after a short delay of silence
+        speechEndTimeoutRef.current = setTimeout(() => {
+            // Check if there's a message to send
+            if (currentMessage.trim()) {
+                sendMessage();
+            }
+        }, 1000); // 1-second delay after speech ends
       };
     } else {
       toast({ title: "Speech Recognition Not Supported", description: "Your browser does not support speech recognition.", variant: "destructive" });
     }
 
     return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      if (speechEndTimeoutRef.current) {
+        clearTimeout(speechEndTimeoutRef.current);
+      }
       window.speechSynthesis.cancel();
     };
-  }, [toast]);
+  }, [toast, currentMessage]); // Add currentMessage to dependencies
 
   const toggleRecording = () => {
     if (isRecording) {
       recognitionRef.current?.stop();
       setIsRecording(false);
     } else {
+        if (speechEndTimeoutRef.current) {
+          clearTimeout(speechEndTimeoutRef.current);
+        }
       recognitionRef.current?.start();
       setIsRecording(true);
     }
@@ -136,7 +156,9 @@ const Chat = () => {
     if (!currentMessage.trim() || !user) return;
     if (isRecording) {
       recognitionRef.current?.stop();
-      setIsRecording(false);
+    }
+    if (speechEndTimeoutRef.current) {
+      clearTimeout(speechEndTimeoutRef.current);
     }
 
     const userMessageContent = currentMessage.trim();
@@ -252,15 +274,15 @@ const Chat = () => {
           <Card className={`w-1/3 transition-all duration-300 ${showHistory ? 'block' : 'hidden'} md:flex md:flex-col`}>
             <CardHeader><CardTitle>Chat History</CardTitle></CardHeader>
             <ScrollArea className="h-full p-4">{chatHistory.map(session => (
-                <div key={session.id} className="group relative mb-2 rounded-lg hover:bg-muted" >
-                  <div className="p-2 cursor-pointer" onClick={() => loadSessionMessages(session.id)}>
+                <div key={session.id} className="relative mb-2 rounded-lg hover:bg-muted flex items-center justify-between" >
+                  <div className="p-2 cursor-pointer flex-grow" onClick={() => loadSessionMessages(session.id)}>
                     <p className="font-semibold truncate">{session.title || 'New Session'}</p>
                     <p className="text-xs text-muted-foreground">{new Date(session.created_at).toLocaleString()}</p>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="absolute top-1/2 right-2 -translate-y-1/2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-7 w-7 flex-shrink-0"
                     onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }}>
                       <Trash2 className="h-4 w-4 text-destructive"/>
                   </Button>
@@ -275,7 +297,7 @@ const Chat = () => {
                       <CardTitle className="flex items-center gap-2"><Brain className="text-primary" />MindCareAi Assistant</CardTitle>
                       <div className="flex items-center gap-2">
                         <Button variant="outline" size="icon" onClick={() => setIsVoiceEnabled(!isVoiceEnabled)}>
-                          {isVoiceEnabled ? <Volume2 className="h-5 w-5"/> : <VolumeX className.reference h-5 w-5"/>}
+                          {isVoiceEnabled ? <Volume2 className="h-5 w-5"/> : <VolumeX className="h-5 w-5"/>}
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => setShowHistory(!showHistory)} className="md:hidden"><MessageSquare className="h-4 w-4"/></Button>
                         <Button variant="outline" size="sm" onClick={clearCurrentChat}><Trash2 className="h-4 w-4 mr-2"/>New Chat</Button>
