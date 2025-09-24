@@ -262,6 +262,7 @@ const Chat = () => {
                     <p className="text-xs text-muted-foreground mt-2 text-center">Your conversation is private and secure. If you are in a crisis, please call a helpline. In India, you can call 112 (emergency), 108 (medical), or 104 (health advice).</p>
                 </div>
             </Card>
+          </div>
         </div>
       </div>
     </div>
