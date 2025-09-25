@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 215 25% 27%;
+    --background: 240 20% 95%;
+    --foreground: 224 76% 28%;
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 27%;
+    --card-foreground: 224 76% 28%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 27%;
-    --primary: 158 64% 52%;
+    --popover-foreground: 224 76% 28%;
+    --primary: 230 80% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
+    --secondary: 220 15% 90%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
+    --muted: 220 15% 90%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent: 220 15% 90%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 158 64% 52%;
+    --ring: 230 80% 60%;
     --radius: 0.75rem;
   }
 
@@ -33,7 +33,7 @@
     --card-foreground: 210 40% 98%;
     --popover: 220 13% 18%;
     --popover-foreground: 210 40% 98%;
-    --primary: 158 64% 52%;
+    --primary: 230 80% 60%;
     --primary-foreground: 0 0% 100%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -45,7 +45,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 158 64% 52%;
+    --ring: 230 80% 60%;
   }
 }
 
@@ -56,9 +56,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
-    background-image: url('/background.jpg');
+    background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
     background-size: cover;
-    background-position: center;
     background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6 {
@@ -68,6 +67,6 @@
 
 @layer components {
   .transparent-card {
-    @apply bg-card/70 backdrop-blur-sm border border-border/20;
+    @apply bg-white/50 backdrop-blur-lg border border-white/20 shadow-lg;
   }
 }

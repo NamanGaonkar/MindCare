@@ -75,14 +75,12 @@ const Chat = () => {
         if (speechEndTimeoutRef.current) {
             clearTimeout(speechEndTimeoutRef.current);
         }
-        // Use a timeout to send the message only after a pause
         speechEndTimeoutRef.current = setTimeout(() => {
             if (finalTranscript.trim()) {
-                // Overwrite current message with final transcript before sending
                 setCurrentMessage(finalTranscript.trim());
                 sendMessage();
             }
-        }, 2000); // 2-second delay after speech ends
+        }, 2000); 
       };
     } else {
       toast({ title: "Speech Recognition Not Supported", description: "Your browser does not support speech recognition.", variant: "destructive" });
@@ -97,7 +95,7 @@ const Chat = () => {
       }
       window.speechSynthesis.cancel();
     };
-  }, [toast]); // IMPORTANT: Removed currentMessage from dependencies to prevent re-initialization
+  }, [toast]); 
 
   const toggleRecording = () => {
     if (isRecording) {
@@ -305,7 +303,7 @@ const Chat = () => {
 
           <div className="flex-1 flex flex-col">
             <Card className="flex-1 flex flex-col shadow-sm transparent-card">
-                <CardHeader className="border-b border-border/20">
+                <CardHeader className="border-b border-white/20">
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2"><Brain className="text-primary" />MindCareAi Assistant</CardTitle>
                       <div className="flex items-center gap-2">
@@ -321,7 +319,7 @@ const Chat = () => {
                   {messages.map((msg) => (
                       <div key={msg.id} className={`flex gap-3 ${msg.sender_type === 'user' ? 'justify-end' : ''}`}>
                           {msg.sender_type === 'ai' && <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0"><Sparkles className="h-5 w-5 text-primary" /></div>}
-                          <div className={`max-w-[75%] rounded-xl px-4 py-2 backdrop-blur-sm ${msg.sender_type === 'user' ? 'bg-primary/80 text-primary-foreground' : 'bg-black/20'}`}>
+                          <div className={`max-w-[75%] rounded-xl px-4 py-2 ${msg.sender_type === 'user' ? 'bg-primary text-white' : 'bg-white/80'}`}>
                               <p className="whitespace-pre-wrap text-sm">{msg.message}</p>
                           </div>
                           {msg.sender_type === 'user' && <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0"><User className="h-5 w-5 text-secondary-foreground" /></div>}
@@ -334,11 +332,11 @@ const Chat = () => {
                       </div>
                   )}
                 </CardContent>
-                <div className="border-t border-border/20 p-4">
+                <div className="border-t border-white/20 p-4">
                     <div className="relative flex items-center">
                         <Input 
                             placeholder={isRecording ? "Listening..." : "Type your message..."} 
-                            className="pr-20 bg-transparent"
+                            className="pr-20"
                             value={currentMessage}
                             onChange={(e) => setCurrentMessage(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
