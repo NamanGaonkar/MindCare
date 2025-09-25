@@ -64,13 +64,11 @@ const Chat = () => {
 
       recognitionRef.current.onend = () => {
         setIsRecording(false);
-        // Automatically send the message after a short delay of silence
         speechEndTimeoutRef.current = setTimeout(() => {
-            // Check if there's a message to send
             if (currentMessage.trim()) {
                 sendMessage();
             }
-        }, 1000); // 1-second delay after speech ends
+        }, 1000); 
       };
     } else {
       toast({ title: "Speech Recognition Not Supported", description: "Your browser does not support speech recognition.", variant: "destructive" });
@@ -85,7 +83,7 @@ const Chat = () => {
       }
       window.speechSynthesis.cancel();
     };
-  }, [toast, currentMessage]); // Add currentMessage to dependencies
+  }, [toast, currentMessage]);
 
   const toggleRecording = () => {
     if (isRecording) {
@@ -271,10 +269,10 @@ const Chat = () => {
       <Navigation />
       <div className="flex-1 flex flex-col min-h-0">
         <div className="h-full flex max-w-7xl mx-auto py-4 gap-4 w-full">
-          <Card className={`w-1/3 transition-all duration-300 ${showHistory ? 'block' : 'hidden'} md:flex md:flex-col`}>
+          <Card className={`w-1/3 transition-all duration-300 ${showHistory ? 'block' : 'hidden'} md:flex md:flex-col transparent-card`}>
             <CardHeader><CardTitle>Chat History</CardTitle></CardHeader>
             <ScrollArea className="h-full p-4">{chatHistory.map(session => (
-                <div key={session.id} className="relative mb-2 rounded-lg hover:bg-muted flex items-center justify-between" >
+                <div key={session.id} className="relative mb-2 rounded-lg hover:bg-white/10 flex items-center justify-between" >
                   <div className="p-2 cursor-pointer flex-grow" onClick={() => loadSessionMessages(session.id)}>
                     <p className="font-semibold truncate">{session.title || 'New Session'}</p>
                     <p className="text-xs text-muted-foreground">{new Date(session.created_at).toLocaleString()}</p>
@@ -291,8 +289,8 @@ const Chat = () => {
           </Card>
 
           <div className="flex-1 flex flex-col">
-            <Card className="flex-1 flex flex-col border-border/50 shadow-sm">
-                <CardHeader className="border-b">
+            <Card className="flex-1 flex flex-col shadow-sm transparent-card">
+                <CardHeader className="border-b border-border/20">
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2"><Brain className="text-primary" />MindCareAi Assistant</CardTitle>
                       <div className="flex items-center gap-2">
@@ -308,7 +306,7 @@ const Chat = () => {
                   {messages.map((msg) => (
                       <div key={msg.id} className={`flex gap-3 ${msg.sender_type === 'user' ? 'justify-end' : ''}`}>
                           {msg.sender_type === 'ai' && <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0"><Sparkles className="h-5 w-5 text-primary" /></div>}
-                          <div className={`max-w-[75%] rounded-xl px-4 py-2 ${msg.sender_type === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                          <div className={`max-w-[75%] rounded-xl px-4 py-2 backdrop-blur-sm ${msg.sender_type === 'user' ? 'bg-primary/80 text-primary-foreground' : 'bg-black/20'}`}>
                               <p className="whitespace-pre-wrap text-sm">{msg.message}</p>
                           </div>
                           {msg.sender_type === 'user' && <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0"><User className="h-5 w-5 text-secondary-foreground" /></div>}
@@ -321,11 +319,11 @@ const Chat = () => {
                       </div>
                   )}
                 </CardContent>
-                <div className="border-t p-4 bg-background/95">
+                <div className="border-t border-border/20 p-4">
                     <div className="relative flex items-center">
                         <Input 
                             placeholder={isRecording ? "Listening..." : "Type your message..."} 
-                            className="pr-20" 
+                            className="pr-20 bg-transparent"
                             value={currentMessage}
                             onChange={(e) => setCurrentMessage(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
