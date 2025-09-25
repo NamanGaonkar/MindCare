@@ -56,8 +56,18 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
+    background-image: url('/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  .transparent-card {
+    @apply bg-card/70 backdrop-blur-sm border border-border/20;
   }
 }

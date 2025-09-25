@@ -46,29 +46,43 @@ const Chat = () => {
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
 
+      let finalTranscript = '';
+
       recognitionRef.current.onresult = (event: any) => {
         if (speechEndTimeoutRef.current) {
-          clearTimeout(speechEndTimeoutRef.current);
+            clearTimeout(speechEndTimeoutRef.current);
         }
-        const transcript = Array.from(event.results)
-          .map((result: any) => result[0])
-          .map((result) => result.transcript)
-          .join('');
-        setCurrentMessage(transcript);
+
+        let interimTranscript = '';
+        finalTranscript = '';
+
+        for (let i = 0; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+        setCurrentMessage(finalTranscript + interimTranscript);
       };
 
       recognitionRef.current.onerror = (event: any) => {
         toast({ title: "Speech Recognition Error", description: event.error, variant: "destructive" });
-        setIsRecording(false);
       };
 
       recognitionRef.current.onend = () => {
         setIsRecording(false);
+        if (speechEndTimeoutRef.current) {
+            clearTimeout(speechEndTimeoutRef.current);
+        }
+        // Use a timeout to send the message only after a pause
         speechEndTimeoutRef.current = setTimeout(() => {
-            if (currentMessage.trim()) {
+            if (finalTranscript.trim()) {
+                // Overwrite current message with final transcript before sending
+                setCurrentMessage(finalTranscript.trim());
                 sendMessage();
             }
-        }, 1000); 
+        }, 2000); // 2-second delay after speech ends
       };
     } else {
       toast({ title: "Speech Recognition Not Supported", description: "Your browser does not support speech recognition.", variant: "destructive" });
@@ -83,16 +97,17 @@ const Chat = () => {
       }
       window.speechSynthesis.cancel();
     };
-  }, [toast, currentMessage]);
+  }, [toast]); // IMPORTANT: Removed currentMessage from dependencies to prevent re-initialization
 
   const toggleRecording = () => {
     if (isRecording) {
       recognitionRef.current?.stop();
       setIsRecording(false);
+      if (speechEndTimeoutRef.current) {
+        clearTimeout(speechEndTimeoutRef.current);
+      }
     } else {
-        if (speechEndTimeoutRef.current) {
-          clearTimeout(speechEndTimeoutRef.current);
-        }
+      setCurrentMessage("");
       recognitionRef.current?.start();
       setIsRecording(true);
     }
