@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/Navigation";
 import AuthModal from "@/components/AuthModal";
@@ -38,133 +38,12 @@ const Chat = () => {
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const recognitionRef = useRef<any>(null);
   const speechEndTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const finalTranscriptRef = useRef("");
 
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
+  const sendMessage = useCallback(async (messageContent?: string) => {
+    const messageToSend = (messageContent || currentMessage).trim();
+    if (!messageToSend || !user) return;
 
-      let finalTranscript = '';
-
-      recognitionRef.current.onresult = (event: any) => {
-        if (speechEndTimeoutRef.current) {
-            clearTimeout(speechEndTimeoutRef.current);
-        }
-
-        let interimTranscript = '';
-        finalTranscript = '';
-
-        for (let i = 0; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-                finalTranscript += event.results[i][0].transcript;
-            } else {
-                interimTranscript += event.results[i][0].transcript;
-            }
-        }
-        setCurrentMessage(finalTranscript + interimTranscript);
-      };
-
-      recognitionRef.current.onerror = (event: any) => {
-        toast({ title: "Speech Recognition Error", description: event.error, variant: "destructive" });
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsRecording(false);
-        if (speechEndTimeoutRef.current) {
-            clearTimeout(speechEndTimeoutRef.current);
-        }
-        speechEndTimeoutRef.current = setTimeout(() => {
-            if (finalTranscript.trim()) {
-                setCurrentMessage(finalTranscript.trim());
-                sendMessage();
-            }
-        }, 2000); 
-      };
-    } else {
-      toast({ title: "Speech Recognition Not Supported", description: "Your browser does not support speech recognition.", variant: "destructive" });
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (speechEndTimeoutRef.current) {
-        clearTimeout(speechEndTimeoutRef.current);
-      }
-      window.speechSynthesis.cancel();
-    };
-  }, [toast]); 
-
-  const toggleRecording = () => {
-    if (isRecording) {
-      recognitionRef.current?.stop();
-      setIsRecording(false);
-      if (speechEndTimeoutRef.current) {
-        clearTimeout(speechEndTimeoutRef.current);
-      }
-    } else {
-      setCurrentMessage("");
-      recognitionRef.current?.start();
-      setIsRecording(true);
-    }
-  };
-
-  const speak = (text: string) => {
-    if (isVoiceEnabled && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
-  const scrollToBottom = () => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      loadChatHistory();
-    }
-  }, [user]);
-
-  const loadChatHistory = async () => {
-    if (!user) return;
-    const { data, error } = await supabase
-      .from('chat_sessions')
-      .select('id, created_at, title')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      toast({ title: "Error loading chat history", description: error.message, variant: "destructive" });
-    } else {
-      setChatHistory(data || []);
-    }
-  };
-
-  const loadSessionMessages = async (sessionId: string) => {
-    window.speechSynthesis.cancel();
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .select('id, message, sender_type, created_at')
-      .eq('session_id', sessionId)
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      toast({ title: "Error loading session", description: error.message, variant: "destructive" });
-      return;
-    }
-    setMessages((data || []).map(msg => ({ ...msg, sender_type: msg.sender_type as 'user' | 'ai' })));
-    setSessionId(sessionId);
-    setShowHistory(false);
-  };
-
-  const sendMessage = async () => {
-    if (!currentMessage.trim() || !user) return;
     if (isRecording) {
       recognitionRef.current?.stop();
     }
@@ -172,9 +51,9 @@ const Chat = () => {
       clearTimeout(speechEndTimeoutRef.current);
     }
 
-    const userMessageContent = currentMessage.trim();
     setCurrentMessage("");
     setIsLoading(true);
+    finalTranscriptRef.current = "";
 
     try {
       const currentSessionId = sessionId;
@@ -182,14 +61,14 @@ const Chat = () => {
 
       const userMessage: ChatMessage = {
         id: `user_${Date.now()}`,
-        message: userMessageContent,
+        message: messageToSend,
         sender_type: 'user',
         created_at: new Date().toISOString(),
       };
       setMessages(prev => [...prev, userMessage]);
 
       const { data, error } = await supabase.functions.invoke('chat-with-gemini', {
-        body: { message: userMessageContent, sessionId: currentSessionId === "new" ? null : currentSessionId, moodRating: 5 },
+        body: { message: messageToSend, sessionId: currentSessionId === "new" ? null : currentSessionId, moodRating: 5 },
       });
 
       if (error) throw new Error(error.message);
@@ -212,8 +91,130 @@ const Chat = () => {
       setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
+      // Using useCallback for loadChatHistory will be beneficial if it's a dependency elsewhere
       loadChatHistory();
     }
+  }, [currentMessage, user, sessionId, isRecording, toast]); // Removed speak, loadchathistory
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onresult = (event: any) => {
+        if (speechEndTimeoutRef.current) {
+            clearTimeout(speechEndTimeoutRef.current);
+        }
+
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = 0; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+        finalTranscriptRef.current = finalTranscript;
+        setCurrentMessage(finalTranscript + interimTranscript);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        toast({ title: "Speech Recognition Error", description: event.error, variant: "destructive" });
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsRecording(false);
+        if (speechEndTimeoutRef.current) {
+            clearTimeout(speechEndTimeoutRef.current);
+        }
+        speechEndTimeoutRef.current = setTimeout(() => {
+            const messageToSend = finalTranscriptRef.current.trim();
+            if (messageToSend) {
+                sendMessage(messageToSend);
+            }
+        }, 1500); 
+      };
+    } else {
+      toast({ title: "Speech Recognition Not Supported", description: "Your browser does not support speech recognition.", variant: "destructive" });
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      if (speechEndTimeoutRef.current) {
+        clearTimeout(speechEndTimeoutRef.current);
+      }
+      window.speechSynthesis.cancel();
+    };
+  }, [toast, sendMessage]);
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+    } else {
+      finalTranscriptRef.current = "";
+      setCurrentMessage("");
+      recognitionRef.current?.start();
+      setIsRecording(true);
+    }
+  };
+
+  const speak = (text: string) => {
+    if (isVoiceEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  };
+
+  const loadChatHistory = useCallback(async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('chat_sessions')
+      .select('id, created_at, title')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast({ title: "Error loading chat history", description: error.message, variant: "destructive" });
+    } else {
+      setChatHistory(data || []);
+    }
+  }, [user, toast]);
+
+  useEffect(() => {
+    if (user) {
+      loadChatHistory();
+    }
+  }, [user, loadChatHistory]);
+
+  const loadSessionMessages = async (sessionId: string) => {
+    window.speechSynthesis.cancel();
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .select('id, message, sender_type, created_at')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      toast({ title: "Error loading session", description: error.message, variant: "destructive" });
+      return;
+    }
+    setMessages((data || []).map(msg => ({ ...msg, sender_type: msg.sender_type as 'user' | 'ai' })));
+    setSessionId(sessionId);
+    setShowHistory(false);
   };
 
   const clearCurrentChat = () => {
@@ -278,7 +279,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-muted/20">
+    <div className="flex h-screen flex-col bg-transparent">
       <Navigation />
       <div className="flex-1 flex flex-col min-h-0">
         <div className="h-full flex max-w-7xl mx-auto py-4 gap-4 w-full">
@@ -346,7 +347,7 @@ const Chat = () => {
                           <Button size="icon" variant={isRecording ? "destructive" : "ghost"} onClick={toggleRecording} disabled={isLoading}>
                               {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={sendMessage} disabled={isLoading || !currentMessage.trim()}>
+                          <Button size="icon" variant="ghost" onClick={() => sendMessage()} disabled={isLoading || !currentMessage.trim()}>
                               <Send className="h-5 w-5" />
                           </Button>
                         </div>
