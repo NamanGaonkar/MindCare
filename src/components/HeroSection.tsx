@@ -2,20 +2,10 @@ import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Book, MessageCircle, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
-import mintBg from "@/assets/mint-theme-background.jpg";
-import skyBg from "@/assets/sky-theme-background.jpg";
-import orangeBg from "@/assets/orange-theme-background.jpg";
-import roseBg from "@/assets/rose-theme-background.jpg";
-import darkBg from "@/assets/dark-theme-background.jpg";
+import Prism from "@/components/Prism";
 
 const HeroSection = () => {
   const { theme } = useTheme();
-
-  const getBackgroundImage = () => {
-    if (theme === 'light') return mintBg;
-    if (theme === 'dark') return darkBg;
-    return mintBg; // default
-  };
 
   const isLight = theme === 'light';
   const textColor = isLight ? 'text-foreground' : 'text-white';
@@ -23,8 +13,21 @@ const HeroSection = () => {
   return (
     <div
       className="relative bg-cover bg-center py-20"
-      style={{ backgroundImage: `url(${getBackgroundImage()})` }}
     >
+        <div className="absolute inset-0">
+            <Prism
+                animationType="3drotate"
+                height={3.5}
+                baseWidth={5.5}
+                glow={1}
+                noise={0.5}
+                scale={3.6}
+                hueShift={0}
+                colorFrequency={1}
+                bloom={1}
+                timeScale={0.5}
+            />
+        </div>
       {!isLight && <div className="absolute inset-0 bg-black/50"></div>}
       <div className="relative container mx-auto px-4 text-center">
         <div className="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
@@ -56,7 +59,7 @@ const HeroSection = () => {
               <ShieldCheck className="h-10 w-10 text-primary" />
             </div>
             <h3 className="mt-5 text-2xl font-bold">Confidential</h3>
-            <p className="mt-3">Your privacy is our priority.</p>
+            <p className.mt-3">Your privacy is our priority.</p>
           </div>
           <div className={`flex flex-col items-center text-center ${textColor}`}>
             <div className="bg-primary/10 rounded-full p-5">

@@ -2,26 +2,12 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useTheme } from "@/components/ThemeProvider";
 import FeatureCards from "@/components/FeatureCards";
 import Testimonials from "@/components/Testimonials";
 import { motion } from "framer-motion";
+import Prism from "@/components/Prism";
 
 const Home = () => {
-  const { theme } = useTheme();
-
-  const getBackgroundImage = () => {
-    const currentTheme = theme === 'system' ? 'light' : theme; // Handle system theme
-    switch (currentTheme) {
-      case 'light':
-        return 'linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url(/src/assets/mint-theme-background.jpg)';
-      case 'dark':
-        return 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(/src/assets/dark-theme-background.jpg)';
-      default:
-        return 'linear-gradient(135deg, hsl(var(--primary)/0.1), hsl(var(--primary)/0.05))';
-    }
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navigation />
@@ -30,11 +16,21 @@ const Home = () => {
         {/* Hero Section with Theme Background */}
         <section 
           className="relative text-center py-20 md:py-32 lg:py-40 px-4 bg-cover bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: getBackgroundImage(),
-            backgroundAttachment: 'fixed'
-          }}
         >
+          <div className="absolute inset-0">
+              <Prism
+                  animationType="3drotate"
+                  height={3.5}
+                  baseWidth={5.5}
+                  glow={1}
+                  noise={0.5}
+                  scale={3.6}
+                  hueShift={0}
+                  colorFrequency={1}
+                  bloom={1}
+                  timeScale={0.5}
+              />
+          </div>
           <div className="absolute inset-0 bg-background/20 backdrop-blur-[1px]"></div>
           <motion.div 
             className="relative z-10 max-w-4xl mx-auto"
