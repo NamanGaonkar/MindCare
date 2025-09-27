@@ -59,7 +59,7 @@ const HeroSection = () => {
               <ShieldCheck className="h-10 w-10 text-primary" />
             </div>
             <h3 className="mt-5 text-2xl font-bold">Confidential</h3>
-            <p className.mt-3">Your privacy is our priority.</p>
+            <p className="mt-3">Your privacy is our priority.</p>
           </div>
           <div className={`flex flex-col items-center text-center ${textColor}`}>
             <div className="bg-primary/10 rounded-full p-5">
