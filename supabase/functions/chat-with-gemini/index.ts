@@ -69,13 +69,18 @@ serve(async (req) => {
     }
 
     // Save user message
-    await supabase.from('chat_messages').insert({
+    const { error: messageError } = await supabase.from('chat_messages').insert({
       session_id: currentSessionId,
       user_id: user.id,
       message,
       sender_type: 'user',
       contains_crisis_keywords: containsCrisisKeywords
     });
+
+    if (messageError) {
+      console.error('Error saving user message:', messageError);
+      throw messageError;
+    }
 
     // Generate system prompt based on context
     let systemPrompt = `You are MindfulMate, a compassionate AI mental health assistant specifically designed for college students. 
