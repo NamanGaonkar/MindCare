@@ -90,7 +90,7 @@ const Chat = () => {
         throw new Error(`Network Error: ${error.message}`);
       }
       if (data.error) {
-        throw new Error(`Chatbot Error: ${data.error}`);
+        throw new Error(`Chatbot Error: ${data.error}. ${data.details ? data.details : ''}`.trim());
       }
       
       if (data.sessionId && (!sessionId || sessionId === "new")) {

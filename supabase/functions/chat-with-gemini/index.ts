@@ -34,6 +34,7 @@ serve(async (req) => {
     const { message, sessionId, moodRating } = await req.json();
     
     console.log('Processing chat request:', { userId: user.id, sessionId, message: message.substring(0, 100) });
+    console.log('Gemini API Key loaded:', geminiApiKey ? 'Yes' : 'No');
 
     // Crisis detection keywords
     const crisisKeywords = [
@@ -152,7 +153,13 @@ COMMON STUDENT ISSUES TO ADDRESS:
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
       console.error('Gemini API error:', errorText);
-      throw new Error('Failed to generate response');
+      return new Response(JSON.stringify({ 
+        error: 'Gemini API error', 
+        details: errorText 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const geminiData = await geminiResponse.json();
